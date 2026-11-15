@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Live results · musik scout</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="assets/logo-static.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<!-- Für den Beamer/Screen am Abend. ?e=YYYY-MM-DD wählt das Event, ?hide=1 versteckt die Zahlen bis zur Auflösung. -->
+<body class="results-page">
+  <div class="results-top">
+    <div>
+      <div class="mono lime" id="meta" style="font-size:1.3vw;margin-bottom:1.5vh"></div>
+      <h1>musik<br>scout</h1>
+    </div>
+    <div style="text-align:right">
+      <img src="assets/logo.svg" alt="" style="width:16vh;margin-left:auto">
+      <div class="mono" style="font-size:1.4vw;margin-top:1.5vh" data-i18n="res.title"></div>
+    </div>
+  </div>
+  <div class="results-bars" id="bars"></div>
+  <div class="results-foot">
+    <div class="qr-box">
+      <div class="qr" id="qr"></div>
+      <div class="mono"><span data-i18n="res.scan"></span><br><span class="dim" id="url"></span></div>
+    </div>
+    <div class="mono"><span id="total">0</span> <span data-i18n="res.votes"></span></div>
+  </div>
+
+  <script src="assets/data.js"></script>
+  <script src="assets/config.js"></script>
+  <script src="assets/i18n.js"></script>
+  <script src="assets/vote.js"></script>
+  <script src="assets/qrcode.js"></script>
+  <script>
+  (function () {
+    const V = window.MS_VOTE, ev = V.currentEvent();
+    const hide = new URLSearchParams(location.search).get("hide") === "1";
+    const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    msApplyI18n();
+    if (!ev) return;
+
+    document.getElementById("meta").textContent = `${ev.weekday} ${ev.date.split("-").reverse().join(".")} · ${ev.venue}`;
+    const voteUrl = new URL("vote.html?e=" + ev.id, location.href).href;
+    document.getElementById("url").textContent = voteUrl.replace(/^https?:\/\//, "");
+    const qr = qrcode(0, "M"); qr.addData(voteUrl); qr.make();
+    document.getElementById("qr").innerHTML = qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+
+    const bars = document.getElementById("bars");
+    bars.innerHTML = ev.live.map((a, i) => `<div class="bar-row" data-i="${i}"><div class="name">${esc(a.name)}</div><div class="bar-track"><div class="bar-fill"></div></div><div class="pct">–</div></div>`).join("");
+
+    async function tick() {
+      let r = {};
+      try { r = await V.results(ev); } catch (e) { return; }
+      const total = ev.live.reduce((s, a) => s + (r[a.name] || 0), 0);
+      const max = Math.max(0, ...ev.live.map((a) => r[a.name] || 0));
+      document.getElementById("total").textContent = total;
+      ev.live.forEach((a, i) => {
+        const n = r[a.name] || 0, row = bars.children[i];
+        const pct = total ? Math.round((n / total) * 100) : 0;
+        row.querySelector(".bar-fill").style.width = hide ? "0%" : (total ? (n / max) * 100 : 0) + "%";
+        row.querySelector(".pct").textContent = hide ? "?" : pct + "%";
+        row.classList.toggle("lead", !hide && n > 0 && n === max);
+      });
+    }
+    tick();
+    setInterval(tick, 4000);
+    window.addEventListener("storage", tick); // Demo-Modus: aktualisiert sofort, wenn im selben Browser abgestimmt wird
+    document.addEventListener("ms:lang", msApplyI18n);
+  })();
+  </script>
+</body>
+</html>

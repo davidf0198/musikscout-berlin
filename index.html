@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>musik scout · Berlin</title>
+  <meta name="description" content="musik scout – a live music series in Berlin. Three live acts, one DJ, and the audience picks the night’s favourite.">
+  <meta name="theme-color" content="#141414">
+  <meta property="og:title" content="musik scout · Berlin">
+  <meta property="og:description" content="Three live acts, one DJ, and the audience picks the night’s favourite.">
+  <link rel="icon" href="assets/logo-static.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<nav class="nav">
+  <a class="brand" href="#top"><img src="assets/logo-static.svg" alt=""> musik scout</a>
+  <ul class="mono">
+    <li><a href="#next" data-i18n="nav.next">Next night</a></li>
+    <li><a href="#how" data-i18n="nav.how">How it works</a></li>
+    <li><a href="#archive" data-i18n="nav.archive">Archive</a></li>
+    <li><a href="#play" data-i18n="nav.play">Play</a></li>
+    <li class="lang"><button data-lang="en">EN</button><span class="dim">/</span><button data-lang="de">DE</button></li>
+  </ul>
+</nav>
+
+<header class="hero wrap" id="top">
+  <div class="hero-meta mono">
+    <span>Berlin<br><span class="dim" data-i18n="hero.kicker">Live music series</span></span>
+    <span class="lime" id="hero-date" style="text-align:right"></span>
+  </div>
+  <div class="hero-grid">
+    <div>
+      <h1 class="wordmark">musik<br>scout</h1>
+      <p class="lede" data-i18n="hero.lede"></p>
+      <div class="cta-row">
+        <a class="btn primary" href="#next" data-i18n="hero.cta">Next night</a>
+        <a class="btn" href="#play" data-i18n="hero.play">Apply to play</a>
+      </div>
+    </div>
+    <div class="hero-logo" id="hero-logo" aria-hidden="true"></div>
+  </div>
+</header>
+
+<section id="next">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 data-i18n="next.title">Next night</h2>
+      <span class="mono lime" id="next-edition"></span>
+    </div>
+    <div id="next-event"></div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <div class="section-head"><h2 data-i18n="how.title">How it works</h2></div>
+    <div class="steps">
+      <div class="step"><div class="num">01</div><h3 data-i18n="how.1.t"></h3><p data-i18n="how.1.p"></p></div>
+      <div class="step"><div class="num">02</div><h3 data-i18n="how.2.t"></h3><p data-i18n="how.2.p"></p></div>
+      <div class="step"><div class="num">03</div><h3 data-i18n="how.3.t"></h3><p data-i18n="how.3.p"></p></div>
+    </div>
+  </div>
+</section>
+
+<section id="archive">
+  <div class="wrap">
+    <div class="section-head"><h2 data-i18n="archive.title">Archive</h2></div>
+    <ul class="archive" id="archive-list"></ul>
+  </div>
+</section>
+
+<section id="play">
+  <div class="wrap apply">
+    <div>
+      <h2 data-i18n="play.title">Play at musik scout</h2>
+      <p data-i18n="play.p"></p>
+    </div>
+    <form class="apply-form" id="apply-form">
+      <label class="field"><span class="mono dim" data-i18n="play.name"></span><input name="name" required></label>
+      <label class="field"><span class="mono dim" data-i18n="play.email"></span><input name="email" type="email" required></label>
+      <label class="field"><span class="mono dim" data-i18n="play.link"></span><input name="link" type="url" required placeholder="https://"></label>
+      <label class="field"><span class="mono dim" data-i18n="play.msg"></span><textarea name="msg"></textarea></label>
+      <div class="cta-row" style="margin-top:8px;align-items:center">
+        <button class="btn primary" type="submit" data-i18n="play.send">Send</button>
+        <span class="mono dim" style="font-size:.7rem" data-i18n="play.note"></span>
+      </div>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap mono">
+    <span>musik scout · Berlin</span>
+    <a id="insta-link" href="#" target="_blank" rel="noopener" class="lime" data-i18n="foot.follow">Follow on Instagram</a>
+    <span class="dim">© <span id="year"></span></span>
+  </div>
+</footer>
+
+<script src="assets/data.js"></script>
+<script src="assets/i18n.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
