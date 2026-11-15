@@ -190,3 +190,9 @@ footer .wrap { display: flex; justify-content: space-between; gap: 20px; flex-wr
 .lang button[aria-pressed="true"] { color: var(--lime); }
 .lang button:hover { color: var(--ink); }
 .hero-logo img { width: 100%; height: auto; }
+
+/* Nach dem Voting */
+.stay { margin-top: 28px; }
+.next-mini { display: grid; gap: 4px; margin-top: 10px; padding: 18px 20px; border: 1px solid var(--line); border-radius: 16px; text-decoration: none; background: var(--bg-2); }
+.next-mini strong { font-size: 1.3rem; letter-spacing: -0.02em; }
+.next-mini:hover { border-color: var(--lime); }

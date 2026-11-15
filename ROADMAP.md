@@ -10,12 +10,20 @@ Sammlung für spätere Ausbaustufen. Noch nichts davon ist umgesetzt, solange es
 ## Voting / QR
 - [x] Abstimmungsseite `vote.html` (eigene Seite, nicht im Hauptmenü)
 - [x] Live-Ergebnis `results.html` mit automatisch erzeugtem QR-Code pro Event
-- [ ] Nach dem Abstimmen: nächsten Termin, Instagram und Newsletter zeigen (holt Besucher auf die Seite)
-- [ ] Druckbare QR-Seite (A4/Tischaufsteller) pro Event
+- [x] Nach dem Abstimmen: nächsten Termin und Instagram zeigen (holt Besucher auf die Seite)
+- [x] Druckbare QR-Seite (A4) pro Event
 
 ## Verwaltung für Nicht-Techniker
-- [ ] Admin-Bereich mit Login: Event anlegen (Datum, Line-up, DJ, Tickets), Voting öffnen/schließen, Gewinner eintragen, QR drucken
-- [ ] Events aus der Datenbank statt aus `assets/data.js`
+- [x] Admin-Bereich mit Login unter geheimem Link: Event anlegen (Datum, Line-up, DJ, Tickets), Voting öffnen/schließen, Gewinner eintragen, QR drucken
+- [x] Events aus der Datenbank statt aus `assets/data.js`
+
+## Community-Bereich (Zukunft, grobe Idee)
+- Login für Besucher:innen mit eigenem Profil („Portfolio“ der besuchten Abende).
+- Teilnahme-Nachweis: Wer ein Ticket gebucht hat (online) oder vor Ort kauft, bekommt einen Code. Damit fügt man den Abend seinem Profil hinzu.
+- Nur mit Nachweis: Fotos vom Abend hochladen. Fotos erscheinen nach Freigabe im Admin-Bereich in der Event-Galerie und sind für andere sichtbar.
+- Offizielle Fotos vom Veranstalter zusätzlich im selben Bereich.
+- Später denkbar: Voting nur für verifizierte Gäste, Stammgast-Vorteile (passt zum Easter-Egg-Rabatt).
+- Technisch: Supabase Auth + Storage für Fotos, Moderation über den Admin-Bereich. Datenschutz/Bildrechte beachten (Einwilligung, Löschmöglichkeit).
 
 ## Sonstiges
 - [ ] Eigene Domain (.de bei INWX/netcup, ca. 5–6 €/Jahr)

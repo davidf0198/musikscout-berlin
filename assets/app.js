@@ -2,12 +2,7 @@
   const D = window.MS_DATA;
   const $ = (s) => document.querySelector(s);
   const esc = (s) => String(s || "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  const today = new Date().toISOString().slice(0, 10);
-
-  const events = [...D.events].sort((a, b) => a.date.localeCompare(b.date));
-  const upcoming = events.filter((e) => e.date >= today);
-  const past = events.filter((e) => e.date < today).reverse();
-  const next = upcoming[0];
+  let next = null, past = [];
 
   const fmt = (iso) => iso.split("-").reverse().join(".");
   const act = (a) => (a.link ? `<a href="${esc(a.link)}" target="_blank" rel="noopener">${esc(a.name)}</a>` : esc(a.name));
@@ -28,7 +23,6 @@
   }
 
   function render() {
-    $("#hero-logo").innerHTML = '<img src="assets/logo.svg" alt="">';
     $("#hero-date").innerHTML = next ? `${next.weekday}<br>${fmt(next.date)}` : "";
     $("#next-edition").textContent = next && next.edition ? next.edition : "";
 
@@ -78,6 +72,12 @@
   $("#year").textContent = new Date().getFullYear();
 
   msApplyI18n();
-  render();
   document.addEventListener("ms:lang", render);
+  MS_DB.listEvents().then((events) => {
+    const today = MS_DB.today();
+    next = events.find((e) => e.date >= today) || null;
+    past = events.filter((e) => e.date < today).reverse();
+    render();
+  }).catch(() => render());
+  $("#hero-logo").innerHTML = '<img src="assets/logo.svg" alt="">';
 })();

@@ -19,22 +19,36 @@
   <script src="assets/data.js"></script>
   <script src="assets/config.js"></script>
   <script src="assets/i18n.js"></script>
-  <script src="assets/vote.js"></script>
+  <script src="assets/db.js"></script>
   <script>
   (function () {
-    const V = window.MS_VOTE, app = document.getElementById("app");
-    const ev = V.currentEvent();
-    let state = "loading", picked = null, busy = false;
-    const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-    const head = () => `<div class="mono"><span class="lime">${t("vote.kicker")}</span> · ${ev ? esc(ev.venue) + " · " + ev.date.split("-").reverse().join(".") : ""}</div>`;
-    const notice = (k) => `${head()}<div class="notice" style="margin-top:22px"><h2>${t(k + ".t")}</h2><p>${t(k + ".p")}</p></div>`;
+    const DB = window.MS_DB, app = document.getElementById("app");
+    let ev = null, nextEv = null, state = "loading", picked = null, busy = false;
+    const esc = (s) => String(s || "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    const fmt = (iso) => iso.split("-").reverse().join(".");
+    const head = () => `<div class="mono"><span class="lime">${t("vote.kicker")}</span>${ev ? " · " + esc(ev.venue) + " · " + fmt(ev.date) : ""}</div>`;
+
+    // Nach dem Abstimmen: Besucher auf die Seite holen
+    const stay = () => `
+      <div class="stay">
+        <div class="mono dim">${t("vote.stay")}</div>
+        ${nextEv ? `<a class="next-mini" href="index.html#next">
+            <span class="mono lime">${t("vote.next")} · ${nextEv.weekday} ${fmt(nextEv.date)}</span>
+            <strong>${nextEv.live.map((a) => esc(a.name)).join(" · ")}</strong>
+            <span class="mono dim">${esc(nextEv.venue)}</span></a>` : ""}
+        <div class="cta-row" style="margin-top:14px">
+          <a class="btn primary" href="${esc(MS_DATA.instagram)}" target="_blank" rel="noopener">${t("vote.follow")}</a>
+          <a class="btn" href="index.html">${t("vote.site")}</a>
+        </div>
+      </div>`;
+    const notice = (k, extra) => `${head()}<div class="notice" style="margin-top:22px"><h2>${t(k + ".t")}</h2><p>${t(k + ".p")}</p></div>${extra ? stay() : ""}`;
 
     function render() {
       msApplyI18n();
-      if (!ev || state === "closed") { app.innerHTML = notice("vote.closed"); return; }
       if (state === "loading") { app.innerHTML = head(); return; }
-      if (state === "thanks") { app.innerHTML = notice("vote.thanks"); return; }
-      if (state === "already") { app.innerHTML = notice("vote.done"); return; }
+      if (!ev || state === "closed") { app.innerHTML = notice("vote.closed", true); return; }
+      if (state === "thanks") { app.innerHTML = notice("vote.thanks", true); return; }
+      if (state === "already") { app.innerHTML = notice("vote.done", true); return; }
       app.innerHTML = `${head()}
         <h1>${t("vote.title")}</h1>
         <p class="sub">${t("vote.sub")}</p>
@@ -48,21 +62,26 @@
       if (c) { picked = c.dataset.act; render(); return; }
       if (e.target.id === "send" && picked && !busy) {
         busy = true; render();
-        try { state = await V.cast(ev, picked); if (state === "ok") state = "thanks"; }
+        try { state = await DB.cast(ev, picked); if (state === "ok") state = "thanks"; }
         catch (err) { busy = false; render(); document.getElementById("err").textContent = t("vote.err"); return; }
         busy = false; render();
       }
     });
     document.addEventListener("ms:lang", render);
+    if (DB.DEMO) document.body.insertAdjacentHTML("beforeend", `<div class="demo-flag" data-i18n="vote.demo"></div>`);
 
-    if (V.DEMO) document.body.insertAdjacentHTML("beforeend", `<div class="demo-flag" data-i18n="vote.demo"></div>`);
+    render();
     (async () => {
-      if (!ev) return render();
-      if (V.hasVoted(ev)) state = "already";
-      else { try { state = (await V.isOpen(ev)) ? "open" : "closed"; } catch (e) { state = "closed"; } }
+      try {
+        const evs = await DB.listEvents();
+        ev = await DB.currentEvent();
+        if (ev) nextEv = evs.find((e) => e.date > ev.date && e.date >= DB.today()) || null;
+        if (!ev) state = "closed";
+        else if (DB.hasVoted(ev)) state = "already";
+        else state = ev.is_open ? "open" : "closed";
+      } catch (e) { state = "closed"; }
       render();
     })();
-    render();
   })();
   </script>
 </body>

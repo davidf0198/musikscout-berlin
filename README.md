@@ -2,56 +2,55 @@
 
 Website für **musik scout**, eine Live-Musik-Reihe in Berlin: drei Live-Acts, ein DJ, und das Publikum stimmt per QR-Code über den Favoriten des Abends ab.
 
-Reines HTML/CSS/JS, kein Build-Schritt. Läuft auf jedem statischen Hosting (GitHub Pages, Netlify, Vercel, IONOS Deploy Now …).
+Reines HTML/CSS/JS, kein Build-Schritt. Läuft auf jedem statischen Hosting (aktuell GitHub Pages). Events und Stimmen liegen in einer kostenlosen Supabase-Datenbank.
 
 ## Seiten
 
-| Datei | Wofür |
+| Seite | Wofür |
 |---|---|
 | `index.html` | One-Pager: nächster Abend, Konzept, Archiv mit Gewinnern, Bewerbung „Play at musik scout“ |
-| `vote.html` | Abstimmungsseite fürs Handy (wird über den QR-Code geöffnet) |
-| `results.html` | Live-Ergebnis für Beamer/Screen am Abend, inkl. QR-Code. `?hide=1` versteckt die Zahlen bis zur Auflösung |
+| `vote.html` | Abstimmung fürs Handy (über den QR-Code). Danach: nächster Termin + Instagram |
+| `results.html` | Live-Ergebnis für den Beamer, mit QR-Code. `?hide=1` versteckt die Zahlen bis zur Auflösung |
+| `qr.html` | Druckbares A4-Plakat mit QR-Code |
+| `backstage-b0ivr8/` | **Admin-Bereich** (geheimer Link + Login) |
 
-Sprache: Englisch als Standard, Umschalter EN/DE oben rechts. Alle Texte stehen in `assets/i18n.js`.
+Alle Seiten nehmen `?e=EVENT-ID` (z. B. `?e=2026-11-24`), sonst automatisch das nächste Event.
+Sprache: Englisch als Standard, Umschalter EN/DE. Texte in `assets/i18n.js`.
 
-## Inhalte pflegen
+## Admin-Bereich (Backstage)
 
-Alles in **`assets/data.js`**:
-- Neues Event → neuen Eintrag in `events` anlegen (Datum, Venue, Line-up, DJ, optional Ticket-Link).
-- Nach dem Abend → `winner` eintragen. Das Event rutscht automatisch ins Archiv.
-- Instagram-Link und E-Mail für Bewerbungen ebenfalls dort.
+Erreichbar nur über den direkten Link `…/backstage-b0ivr8/`, nirgends auf der Seite verlinkt. Geschützt wird er aber durch den **Login**, nicht durch den Link. Das Repo ist öffentlich, der Ordnername ist also für Neugierige auffindbar. Ordner umbenennen geht jederzeit.
 
-## Voting
+Dort kann man:
+- Events anlegen und bearbeiten (Datum, Location, Line-up, DJ, Ticket-Link)
+- Voting öffnen und schließen
+- Live-Ergebnis sehen, Gewinner speichern (erscheint dann im Archiv), Test-Stimmen zurücksetzen
+- Beamer-Ansicht öffnen, QR-Plakat drucken, Voting-Link kopieren
 
-Ohne Einrichtung läuft das Voting im **Demo-Modus**: Stimmen werden nur im eigenen Browser gezählt. Das reicht zum Ausprobieren.
+## Einrichtung (einmalig, ca. 10 Minuten, kostenlos)
 
-Für echte Abende (kostenlos, ca. 10 Minuten):
-1. Auf [supabase.com](https://supabase.com) ein kostenloses Projekt anlegen.
+Ohne Einrichtung läuft alles im **Demo-Modus**: Events kommen aus `assets/data.js`, Änderungen und Stimmen bleiben nur im eigenen Browser. Im Backstage funktioniert dann jede E-Mail und jedes Passwort.
+
+1. Auf [supabase.com](https://supabase.com) ein kostenloses Projekt anlegen (Region Frankfurt).
 2. **SQL Editor** → Inhalt von `supabase/schema.sql` einfügen → **Run**.
-3. **Project Settings → API**: „Project URL“ und „anon public“-Key in `assets/config.js` eintragen.
+3. **Authentication → Users → Add user**: E-Mail + Passwort für den Admin (Auto Confirm an).
+4. **Authentication → Sign In / Providers**: „Allow new users to sign up“ **ausschalten**.
+5. Im SQL Editor: `insert into admins (user_id) select id from auth.users where email = 'deine@mail.de';`
+6. **Project Settings → API**: „Project URL“ und „anon public“-Key in `assets/config.js` eintragen, committen.
 
-Am Abend:
-- Abstimmung öffnen: im SQL Editor `update voting_events set is_open = true where event_id = '2026-11-24';`
-- `results.html` auf den Beamer, der QR-Code führt zu `vote.html?e=2026-11-24`.
-- Am Ende `is_open = false` setzen.
+Der anon-Key ist öffentlich gedacht. Schreiben dürfen nur eingeloggte Admins (durch Regeln in der Datenbank abgesichert).
 
-Für jedes neue Event in Supabase eine Zeile anlegen (siehe Ende von `schema.sql`). Die Act-Namen müssen genau wie in `data.js` geschrieben sein.
+## Am Abend
+
+1. Backstage → Event → **Voting öffnen**
+2. `results.html` auf den Beamer, QR-Plakate an die Bar
+3. Am Ende **Voting schließen**, Gewinner speichern
 
 Pro Handy ist eine Stimme möglich (Geräte-ID + Sperre in der Datenbank). Wer seine Browserdaten löscht, kann erneut abstimmen. Für einen Abend in der Bar ist das ein vernünftiger Kompromiss.
 
-## Bewerbungen
+## Sonstiges
 
-Das Formular öffnet aktuell das Mailprogramm mit allen Angaben (kein Server nötig). Später kann es auf Formspree, Netlify Forms o. Ä. umgestellt werden.
-
-## Lokal ansehen
-
-```
-python3 -m http.server
-```
-→ http://localhost:8000
-
-## Ideen für später
-- Eigene Domain (z. B. musikscout.berlin)
-- Newsletter-Anmeldung
-- Fotos/Aftermovie pro Abend im Archiv
-- Kleiner Admin-Button statt SQL zum Öffnen/Schließen des Votings
+- Instagram-Link und Bewerbungs-E-Mail: `assets/data.js`
+- Das Bewerbungsformular öffnet aktuell das Mailprogramm (kein Server nötig).
+- Lokal ansehen: `python3 -m http.server` → http://localhost:8000
+- Ideen und Planung: [`ROADMAP.md`](ROADMAP.md)

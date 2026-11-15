@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QR · musik scout</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="assets/logo-static.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    @page { size: A4; margin: 0; }
+    body { background: #555; }
+    .sheet { width: 210mm; height: 297mm; margin: 24px auto; background: var(--bg); color: var(--ink); padding: 18mm; display: grid; grid-template-rows: auto 1fr auto; box-shadow: 0 10px 40px rgba(0,0,0,.4); }
+    .sheet .top { display: flex; justify-content: space-between; }
+    .sheet .mid { display: grid; align-content: center; justify-items: center; gap: 10mm; text-align: center; }
+    .sheet h1 { font-size: 30mm; font-weight: 800; letter-spacing: -0.055em; line-height: .82; }
+    .sheet .ask { font-size: 11mm; font-weight: 800; letter-spacing: -0.04em; line-height: 1; }
+    .sheet .qrbig { background: var(--ink); padding: 6mm; border-radius: 6mm; width: 100mm; height: 100mm; }
+    .sheet .qrbig svg { width: 100%; height: 100%; }
+    .sheet .bottom { display: flex; justify-content: space-between; align-items: flex-end; }
+    .toolbar { position: fixed; top: 12px; right: 12px; display: flex; gap: 8px; }
+    @media print {
+      body { background: none; } .toolbar { display: none; }
+      .sheet { margin: 0; box-shadow: none; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar"><button class="btn primary" onclick="print()">Drucken / PDF</button></div>
+  <div class="sheet">
+    <div class="top mono"><span id="venue">Berlin</span><span class="lime" id="date"></span></div>
+    <div class="mid">
+      <img src="assets/logo-static.svg" alt="" style="width:34mm">
+      <div class="ask">Vote for tonight’s<br>favourite act</div>
+      <div class="qrbig" id="qr"></div>
+      <div class="mono" id="acts" style="font-size:4.2mm"></div>
+    </div>
+    <div class="bottom">
+      <h1>musik<br>scout</h1>
+      <div class="mono dim" id="url" style="text-align:right;font-size:3mm"></div>
+    </div>
+  </div>
+
+  <script src="assets/data.js"></script>
+  <script src="assets/config.js"></script>
+  <script src="assets/i18n.js"></script>
+  <script src="assets/db.js"></script>
+  <script src="assets/qrcode.js"></script>
+  <script>
+  (async function () {
+    const ev = await MS_DB.currentEvent().catch(() => null);
+    if (!ev) return;
+    const url = new URL("vote.html?e=" + encodeURIComponent(ev.id), location.href).href;
+    document.getElementById("venue").innerHTML = "Berlin<br>" + ev.venue;
+    document.getElementById("date").innerHTML = ev.weekday + "<br>" + ev.date.split("-").reverse().join(".");
+    document.getElementById("acts").textContent = ev.live.map((a) => a.name).join("  ·  ");
+    document.getElementById("url").textContent = url.replace(/^https?:\/\//, "");
+    const q = qrcode(0, "M"); q.addData(url); q.make();
+    document.getElementById("qr").innerHTML = q.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+  })();
+  </script>
+</body>
+</html>
