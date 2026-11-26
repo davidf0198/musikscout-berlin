@@ -48,6 +48,14 @@ Der anon-Key ist öffentlich gedacht. Schreiben dürfen nur eingeloggte Admins (
 
 Pro Handy ist eine Stimme möglich (Geräte-ID + Sperre in der Datenbank). Wer seine Browserdaten löscht, kann erneut abstimmen. Für einen Abend in der Bar ist das ein vernünftiger Kompromiss.
 
+## Ablauf bei Änderungen
+
+- **`staging`** → Vorschau auf GitHub Pages (davidf0198.github.io/musikscout-berlin). Hier wird alles zuerst getestet.
+- **`main`** → Live-Seite auf der eigenen Domain (IONOS Deploy Now).
+- Passt die Vorschau, wird `staging` in `main` übernommen.
+
+Ein GitHub-Workflow pingt Supabase zweimal pro Woche, damit das kostenlose Projekt nicht pausiert.
+
 ## Sonstiges
 
 - Instagram-Link und Bewerbungs-E-Mail: `assets/data.js`
