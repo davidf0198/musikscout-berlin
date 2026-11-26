@@ -5,5 +5,5 @@
 // ─────────────────────────────────────────────────────────────
 window.MS_CONFIG = {
   supabaseUrl: "",      // z. B. "https://abcd1234.supabase.co"
-  supabaseAnonKey: "",  // Project Settings → API → anon public
+  supabaseAnonKey: "",  // "Publishable key" (sb_publishable_…) oder alter "anon"-Key
 };

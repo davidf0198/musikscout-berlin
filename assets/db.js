@@ -37,12 +37,12 @@
 
   // ── REST ──
   function headers(auth) {
+    // Ohne Login reicht der apikey-Header. So funktionieren sowohl der neue
+    // "publishable" Key (sb_publishable_…) als auch der alte "anon"-Key.
     const s = auth ? ss.get("ms-session") : null;
-    return {
-      apikey: C.supabaseAnonKey,
-      Authorization: "Bearer " + (s ? s.access_token : C.supabaseAnonKey),
-      "Content-Type": "application/json",
-    };
+    const h = { apikey: C.supabaseAnonKey, "Content-Type": "application/json" };
+    if (s) h.Authorization = "Bearer " + s.access_token;
+    return h;
   }
   async function req(path, opts = {}, auth = false) {
     const r = await fetch(URL_ + path, Object.assign({ headers: headers(auth) }, opts));

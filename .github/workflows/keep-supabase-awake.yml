@@ -20,6 +20,6 @@ jobs:
             echo "Supabase noch nicht eingerichtet – nichts zu tun."; exit 0
           fi
           code=$(curl -s -o /dev/null -w "%{http_code}" "$URL/rest/v1/events?select=id&limit=1" \
-            -H "apikey: $KEY" -H "Authorization: Bearer $KEY")
+            -H "apikey: $KEY")
           echo "Antwort: $code"
           [ "$code" = "200" ]
