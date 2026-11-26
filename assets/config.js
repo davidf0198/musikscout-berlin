@@ -4,6 +4,6 @@
 //  Der "anon"-Key ist öffentlich gedacht und darf hier stehen.
 // ─────────────────────────────────────────────────────────────
 window.MS_CONFIG = {
-  supabaseUrl: "",      // z. B. "https://abcd1234.supabase.co"
-  supabaseAnonKey: "",  // "Publishable key" (sb_publishable_…) oder alter "anon"-Key
+  supabaseUrl: "https://vgrrxpsnhpgbzrauwxeb.supabase.co",      // z. B. "https://abcd1234.supabase.co"
+  supabaseAnonKey: "sb_publishable_n71qmfNH4Igwz2Hw3VRG4A_0GEprLYK",  // "Publishable key" (sb_publishable_…) oder alter "anon"-Key
 };
