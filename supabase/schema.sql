@@ -57,6 +57,15 @@ create policy votes_admin on votes for all to authenticated using (is_admin()) w
 drop policy if exists admins_self on admins;
 create policy admins_self on admins for select to authenticated using (user_id = auth.uid());
 
+-- Tabellenrechte explizit vergeben (nötig, wenn "Grant API access to new tables
+-- automatically" beim Anlegen des Projekts aus war). Die Regeln oben schränken
+-- zusätzlich ein, wer welche Zeilen sehen bzw. ändern darf.
+grant usage on schema public to anon, authenticated;
+grant select on events to anon, authenticated;
+grant insert, update, delete on events to authenticated;
+grant select, delete on votes to authenticated;
+grant select on admins to authenticated;
+
 -- ── Funktionen fürs Voting ────────────────────────────────────────────
 
 create or replace function cast_vote(p_event text, p_act text, p_device text)
