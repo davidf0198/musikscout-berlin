@@ -10,8 +10,8 @@
     en: {
       forgot: "Forgot password?", resetSend: "Send reset link", resetSent: "If this email has an account, a link to set a new password is on its way. Check your inbox (and spam).",
       setPwTitle: "Set your password", setPwIntro: "Welcome! Choose a password for your Backstage account.", setPwBtn: "Save password and continue", linkExpired: "This link has expired. Use “Forgot password?” to get a new one.",
-      tabBoard: "Board", account: "Account", newPw: "New password", newPw2: "Repeat new password", pwHint: "At least 10 characters.",
-      pwSave: "Change password", pwMismatch: "The passwords don’t match.", pwShort: "Too short (min. 10 characters).", pwDone: "Password changed",
+      tabBoard: "Board", account: "Account", newPw: "New password", newPw2: "Repeat new password", pwHint: "At least 6 characters.",
+      pwSave: "Change password", pwMismatch: "The passwords don’t match.", pwShort: "Too short (min. 6 characters).", pwDone: "Password changed",
       pwDemo: "Not available in demo mode.", close: "Close",
       boardTitle: "Board", boardIntro: "Wishes, ideas and proposals for the website. Changes are first built on the preview; approve or reject them here before they go live.",
       newItem: "+ New entry", kindLabel: "Type", k_wish: "Wish", k_proposal: "Proposal", k_bug: "Problem",
@@ -48,8 +48,8 @@
     de: {
       forgot: "Passwort vergessen?", resetSend: "Link zum Zurücksetzen senden", resetSent: "Falls zu dieser E-Mail ein Konto existiert, kommt gleich ein Link zum Festlegen eines neuen Passworts. Bitte Posteingang (und Spam) prüfen.",
       setPwTitle: "Passwort festlegen", setPwIntro: "Willkommen! Lege ein Passwort für deinen Backstage-Zugang fest.", setPwBtn: "Passwort speichern und weiter", linkExpired: "Dieser Link ist abgelaufen. Über „Passwort vergessen?“ bekommst du einen neuen.",
-      tabBoard: "Board", account: "Konto", newPw: "Neues Passwort", newPw2: "Neues Passwort wiederholen", pwHint: "Mindestens 10 Zeichen.",
-      pwSave: "Passwort ändern", pwMismatch: "Die Passwörter stimmen nicht überein.", pwShort: "Zu kurz (mind. 10 Zeichen).", pwDone: "Passwort geändert",
+      tabBoard: "Board", account: "Konto", newPw: "Neues Passwort", newPw2: "Neues Passwort wiederholen", pwHint: "Mindestens 6 Zeichen.",
+      pwSave: "Passwort ändern", pwMismatch: "Die Passwörter stimmen nicht überein.", pwShort: "Zu kurz (mind. 6 Zeichen).", pwDone: "Passwort geändert",
       pwDemo: "Im Demo-Modus nicht verfügbar.", close: "Schließen",
       boardTitle: "Board", boardIntro: "Wünsche, Ideen und Vorschläge für die Website. Änderungen werden zuerst auf der Vorschau umgesetzt; hier werden sie angenommen oder abgelehnt, bevor sie live gehen.",
       newItem: "+ Neuer Eintrag", kindLabel: "Art", k_wish: "Wunsch", k_proposal: "Vorschlag", k_bug: "Problem",
@@ -321,8 +321,8 @@
     const m = document.createElement("div"); m.className = "modal";
     m.innerHTML = `<form class="modal-box" id="pwf">
       <div class="mono lime">${T("account")}</div><h2 style="font-size:1.8rem">${esc(s.email || "")}</h2>
-      <label class="field"><span class="mono dim">${T("newPw")}</span><input type="password" name="p1" autocomplete="new-password" required minlength="10"></label>
-      <label class="field"><span class="mono dim">${T("newPw2")}</span><input type="password" name="p2" autocomplete="new-password" required minlength="10"></label>
+      <label class="field"><span class="mono dim">${T("newPw")}</span><input type="password" name="p1" autocomplete="new-password" required minlength="6"></label>
+      <label class="field"><span class="mono dim">${T("newPw2")}</span><input type="password" name="p2" autocomplete="new-password" required minlength="6"></label>
       <p class="hint">${DB.DEMO ? T("pwDemo") : T("pwHint")}</p>
       <div class="err" id="pwerr"></div>
       <div class="cta-row"><button class="btn primary" ${DB.DEMO ? "disabled" : ""}>${T("pwSave")}</button><button type="button" class="btn ghost" id="pwclose">${T("close")}</button></div>
@@ -334,7 +334,7 @@
     m.querySelector("#pwf").addEventListener("submit", async (e) => {
       e.preventDefault();
       const f = new FormData(e.target), p1 = f.get("p1"), p2 = f.get("p2"), err = m.querySelector("#pwerr");
-      if (p1.length < 10) { err.textContent = T("pwShort"); return; }
+      if (p1.length < 6) { err.textContent = T("pwShort"); return; }
       if (p1 !== p2) { err.textContent = T("pwMismatch"); return; }
       try { await DB.changePassword(p1); toast(T("pwDone")); close(); }
       catch (x) { if (x.message === "SESSION") { close(); toast(T("relogin")); renderLogin(); } else err.textContent = x.message; }
@@ -480,8 +480,8 @@
         <div class="mono lime">Backstage</div>
         <h1>${T("setPwTitle")}</h1>
         <p class="dim">${T("setPwIntro")}<br><span class="mono">${esc(s.email || "")}</span></p>
-        <label class="field"><span class="mono dim">${T("newPw")}</span><input type="password" name="p1" autocomplete="new-password" required minlength="10"></label>
-        <label class="field"><span class="mono dim">${T("newPw2")}</span><input type="password" name="p2" autocomplete="new-password" required minlength="10"></label>
+        <label class="field"><span class="mono dim">${T("newPw")}</span><input type="password" name="p1" autocomplete="new-password" required minlength="6"></label>
+        <label class="field"><span class="mono dim">${T("newPw2")}</span><input type="password" name="p2" autocomplete="new-password" required minlength="6"></label>
         <p class="hint">${T("pwHint")}</p>
         <button class="btn primary" style="justify-content:center">${T("setPwBtn")}</button>
         <div class="err" id="err"></div>
@@ -489,7 +489,7 @@
     document.getElementById("setpw").addEventListener("submit", async (e) => {
       e.preventDefault();
       const f = new FormData(e.target), p1 = f.get("p1"), p2 = f.get("p2"), err = document.getElementById("err");
-      if (p1.length < 10) { err.textContent = T("pwShort"); return; }
+      if (p1.length < 6) { err.textContent = T("pwShort"); return; }
       if (p1 !== p2) { err.textContent = T("pwMismatch"); return; }
       try { await DB.changePassword(p1); toast(T("pwDone")); await load(); }
       catch (x) { if (x.message === "SESSION") { renderLogin(); document.getElementById("err").textContent = T("linkExpired"); } else err.textContent = x.message; }
