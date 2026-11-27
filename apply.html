@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Get in touch · musik scout</title>
+  <meta name="theme-color" content="#121212">
+  <link rel="icon" href="assets/logo-static.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<nav class="nav">
+  <a class="brand" href="index.html"><img src="assets/logo-static.svg" alt=""> musik scout</a>
+  <ul class="mono">
+    <li class="nav-ig"><a class="icon-btn js-insta" href="#" target="_blank" rel="noopener" aria-label="Instagram"><svg class="ig" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.3" cy="6.7" r="1.3" fill="currentColor"/></svg></a></li>
+    <li class="lang"><button data-lang="en">EN</button><span class="dim">/</span><button data-lang="de">DE</button></li>
+  </ul>
+</nav>
+
+<main class="wrap apply-page">
+  <div class="apply-tabs mono" role="tablist">
+    <a href="?type=artist" data-type="artist" data-i18n="apply.tab.artist">Artist / DJ</a>
+    <a href="?type=venue" data-type="venue" data-i18n="apply.tab.venue">Venue</a>
+  </div>
+  <div id="app"></div>
+</main>
+
+<script src="assets/data.js"></script>
+<script src="assets/config.js"></script>
+<script src="assets/i18n.js"></script>
+<script src="assets/db.js"></script>
+<script>
+(function () {
+  const app = document.getElementById("app");
+  const MAX = 25 * 1024 * 1024;
+  let type = new URLSearchParams(location.search).get("type") === "venue" ? "venue" : "artist";
+  let done = false, draft = {};
+  const esc = (s) => String(s || "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  document.querySelectorAll(".js-insta").forEach((a) => (a.href = MS_DATA.instagram));
+
+  const F = (name, label, attrs = "", tag = "input") => `<label class="field"><span class="mono dim">${label}</span>${
+    tag === "textarea" ? `<textarea name="${name}" ${attrs}>${esc(draft[name])}</textarea>` : `<input name="${name}" ${attrs} value="${esc(draft[name])}">`}</label>`;
+
+  function form() {
+    const a = type === "artist";
+    return `
+      <h1 class="apply-title">${t("apply.title." + type)}</h1>
+      <p class="apply-lede">${t("apply.lede." + type)}</p>
+      <form class="apply-form" id="f" novalidate>
+        <div class="grid2">
+          ${F("name", t("f.name." + type), 'required maxlength="200"')}
+          ${F("contact", t("f.contact"), 'maxlength="200" autocomplete="name"')}
+          ${F("email", t("f.email"), 'type="email" required maxlength="200" autocomplete="email"')}
+          ${F("instagram", t("f.instagram"), 'placeholder="@" maxlength="100"')}
+          ${a ? F("genre", t("f.genre"), 'maxlength="100"') : F("phone", t("f.phone"), 'type="tel" maxlength="50" autocomplete="tel"')}
+          ${F("city", a ? t("f.city") : t("f.address"), 'maxlength="200"')}
+        </div>
+        ${a ? `
+          <fieldset class="radio-row"><legend class="mono dim">${t("f.type")}</legend>
+            ${["live", "dj", "both"].map((v) => `<label><input type="radio" name="acttype" value="${v}" ${draft.acttype === v || (!draft.acttype && v === "live") ? "checked" : ""}> ${t("f.type." + v)}</label>`).join("")}
+          </fieldset>
+          ${F("links", t("f.links"), 'rows="3" maxlength="3000" placeholder="https://"', "textarea")}
+        ` : `
+          <div class="grid2">
+            ${F("venuetype", t("f.venuetype"), 'maxlength="100" placeholder="Bar, club, gallery …"')}
+            ${F("capacity", t("f.capacity"), 'maxlength="50"')}
+            ${F("tech", t("f.tech"), 'maxlength="300"')}
+            ${F("dates", t("f.dates"), 'maxlength="300"')}
+          </div>
+        `}
+        ${F("message", t("f.message." + type), 'rows="5" maxlength="5000"', "textarea")}
+        <label class="field"><span class="mono dim">${t("f.files." + type)}</span>
+          <input type="file" name="files" multiple accept="${a ? "audio/*,.mp3,.wav,.m4a,application/pdf,image/*" : "image/*,application/pdf"}"></label>
+        <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <label class="consent"><input type="checkbox" name="consent" required> <span>${t("f.consent")}</span></label>
+        <div class="cta-row" style="align-items:center">
+          <button class="btn primary" id="send">${t("f.send")}</button>
+          <span class="mono err" id="err"></span>
+        </div>
+      </form>`;
+  }
+
+  function render() {
+    msApplyI18n();
+    document.querySelectorAll(".apply-tabs a").forEach((x) => x.setAttribute("aria-selected", x.dataset.type === type));
+    if (done) {
+      app.innerHTML = `<div class="notice apply-done"><h2>${t("f.ok.t")}</h2><p>${t("f.ok.p")}</p>
+        <div class="cta-row" style="margin-top:18px"><a class="btn primary" href="${esc(MS_DATA.instagram)}" target="_blank" rel="noopener">${t("vote.follow")}</a><a class="btn" href="index.html">${t("vote.site")}</a></div></div>`;
+      return;
+    }
+    app.innerHTML = form();
+  }
+
+  // Eingaben beim Sprach-/Tab-Wechsel behalten
+  function keep() { const f = document.getElementById("f"); if (!f) return; new FormData(f).forEach((v, k) => { if (typeof v === "string") draft[k] = v; }); }
+  document.querySelectorAll(".apply-tabs a").forEach((x) => x.addEventListener("click", (e) => {
+    e.preventDefault(); keep(); type = x.dataset.type; done = false; history.replaceState(null, "", "?type=" + type); render();
+  }));
+  document.addEventListener("ms:lang", () => { keep(); render(); });
+
+  app.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const f = e.target, fd = new FormData(f), err = document.getElementById("err"), btn = document.getElementById("send");
+    err.textContent = "";
+    if (fd.get("website")) { done = true; render(); return; } // Spam-Falle
+    if (!f.checkValidity()) { f.reportValidity(); return; }
+    const files = [...f.elements.files.files];
+    if (files.some((x) => x.size > MAX)) { err.textContent = t("f.toobig"); return; }
+    const g = (k) => String(fd.get(k) || "").trim();
+    const data = {
+      kind: type, name: g("name"), contact: g("contact"), email: g("email"), instagram: g("instagram"),
+      city: g("city"), genre: g("genre"), phone: g("phone"), links: g("links"), message: g("message"),
+      details: type === "artist" ? { acttype: g("acttype"), lang: msLang() } : { venuetype: g("venuetype"), capacity: g("capacity"), tech: g("tech"), dates: g("dates"), lang: msLang() },
+    };
+    btn.disabled = true; btn.textContent = t("f.sending");
+    try { await MS_DB.submitRequest(data, files); done = true; draft = {}; render(); window.scrollTo({ top: 0, behavior: "smooth" }); }
+    catch (x) { console.error(x); btn.disabled = false; btn.textContent = t("f.send"); err.textContent = t("f.err"); }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

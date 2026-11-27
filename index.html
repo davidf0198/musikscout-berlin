@@ -22,6 +22,7 @@
     <li><a href="#archive" data-i18n="nav.archive">Archive</a></li>
     <li><a href="#artists" data-i18n="nav.artists">Artists</a></li>
     <li><a href="#support" data-i18n="nav.support">Support</a></li>
+    <li class="nav-ig"><a class="icon-btn js-insta" href="#" target="_blank" rel="noopener" aria-label="Instagram"><svg class="ig" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.3" cy="6.7" r="1.3" fill="currentColor"/></svg></a></li>
     <li class="lang"><button data-lang="en">EN</button><span class="dim">/</span><button data-lang="de">DE</button></li>
   </ul>
 </nav>
@@ -39,6 +40,7 @@
         <a class="btn primary" href="#next" data-i18n="hero.cta">Next night</a>
         <a class="btn" href="#artists" data-i18n="hero.play">For artists</a>
       </div>
+      <a class="ig-pill js-insta" href="#" target="_blank" rel="noopener"><svg class="ig" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.3" cy="6.7" r="1.3" fill="currentColor"/></svg><span class="js-handle">@musikscout.berlin</span><span class="ig-follow" data-i18n="insta.follow">Follow</span></a>
     </div>
     <div class="hero-logo" aria-hidden="true"><img src="assets/logo.svg" alt=""></div>
   </div>
@@ -98,7 +100,10 @@
         <li><span class="n">2</span><span data-i18n="artists.2"></span></li>
         <li><span class="n">3</span><span data-i18n="artists.3"></span></li>
       </ol>
-      <div class="cta-row"><a class="btn primary js-insta" href="#" target="_blank" rel="noopener" data-i18n="artists.dm">DM us on Instagram</a></div>
+      <div class="cta-row">
+        <a class="btn primary" href="apply.html?type=artist" data-i18n="artists.apply">Apply here</a>
+        <a class="btn js-insta" href="#" target="_blank" rel="noopener"><svg class="ig" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.3" cy="6.7" r="1.3" fill="currentColor"/></svg><span data-i18n="artists.dm">DM us on Instagram</span></a>
+      </div>
     </div>
     <div class="artists-side">
       <a class="qr-card js-insta" href="#" target="_blank" rel="noopener">
@@ -113,6 +118,19 @@
   </div>
 </section>
 
+<section id="venues">
+  <div class="wrap venues">
+    <div>
+      <div class="mono lime" data-i18n="venues.kicker">For venues</div>
+      <h2 data-i18n="venues.title">Host a night</h2>
+    </div>
+    <div>
+      <p data-i18n="venues.p"></p>
+      <div class="cta-row"><a class="btn primary" href="apply.html?type=venue" data-i18n="venues.btn">Get in touch</a></div>
+    </div>
+  </div>
+</section>
+
 <section id="support">
   <div class="wrap support">
     <div>
@@ -123,16 +141,18 @@
     <div class="support-qr">
       <div class="qr" id="qr-paypal"></div>
       <div class="mono dim" data-i18n="support.scan"></div>
-      <div class="donate-range">€10 – €20</div>
     </div>
   </div>
 </section>
 
 <footer>
-  <div class="wrap mono">
-    <span>musik scout · Berlin</span>
-    <a href="#" target="_blank" rel="noopener" class="lime js-insta" data-i18n="foot.follow">Follow on Instagram</a>
-    <span class="dim">© <span id="year"></span></span>
+  <div class="wrap mono foot">
+    <div class="foot-brand"><img src="assets/logo-static.svg" alt=""> musik scout · Berlin</div>
+    <div class="foot-social">
+      <a class="icon-btn js-insta" href="#" target="_blank" rel="noopener" aria-label="Instagram"><svg class="ig" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.3" cy="6.7" r="1.3" fill="currentColor"/></svg></a>
+      <a class="lime js-insta" href="#" target="_blank" rel="noopener" data-i18n="foot.follow">Follow on Instagram</a>
+    </div>
+    <div class="foot-legal"><a href="imprint.html" data-i18n="legal.imprint">Imprint</a><a href="privacy.html" data-i18n="legal.privacy">Privacy</a><span class="dim">© <span id="year"></span></span></div>
   </div>
 </footer>
 

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Imprint · musik scout</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#121212">
+  <link rel="icon" href="assets/logo-static.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .legal { max-width: 760px; padding-top: 40px; padding-bottom: 90px; }
+    .legal h1 { font-size: clamp(2.4rem, 6vw, 3.6rem); letter-spacing: -0.045em; margin-bottom: 26px; }
+    .legal h2 { font-size: 1.3rem; letter-spacing: -0.02em; margin: 28px 0 8px; }
+    .legal p, .legal li { color: var(--ink-dim); margin-bottom: 8px; }
+    .legal ul { padding-left: 20px; }
+    .legal .todo { background: #3a2f00; color: #ffd84a; padding: 1px 6px; border-radius: 4px; font-family: var(--mono); font-size: .85em; }
+    .legal .draft { border: 1px solid #5a4a00; background: #2a2300; color: #ffd84a; padding: 12px 16px; border-radius: 12px; margin-bottom: 26px; font-size: .9rem; }
+    [data-only] { display: none; } html[lang=en] [data-only=en], html[lang=de] [data-only=de] { display: block; }
+  </style>
+</head>
+<body>
+<nav class="nav">
+  <a class="brand" href="index.html"><img src="assets/logo-static.svg" alt=""> musik scout</a>
+  <ul class="mono"><li class="lang"><button data-lang="en">EN</button><span class="dim">/</span><button data-lang="de">DE</button></li></ul>
+</nav>
+<main class="wrap legal">
+  <div class="draft">DRAFT – placeholders marked in yellow must be filled in by the operator, and the text should be checked (e.g. with a generator such as e-recht24 or a lawyer) before going live.</div>
+  <div data-only="en"><h1>Imprint</h1>
+<p>Information according to § 5 DDG (German Digital Services Act)</p>
+<p><span class="todo">Full name</span><br><span class="todo">Street and number</span><br><span class="todo">Postcode</span> Berlin<br>Germany</p>
+<h2>Contact</h2><p>Email: <span class="todo">email address</span><br>Instagram: @musikscout.berlin</p>
+<h2>Responsible for content</h2><p><span class="todo">Full name, address as above</span></p></div>
+  <div data-only="de"><h1>Impressum</h1>
+<p>Angaben gemäß § 5 DDG</p>
+<p><span class="todo">Vor- und Nachname</span><br><span class="todo">Straße und Hausnummer</span><br><span class="todo">PLZ</span> Berlin<br>Deutschland</p>
+<h2>Kontakt</h2><p>E-Mail: <span class="todo">E-Mail-Adresse</span><br>Instagram: @musikscout.berlin</p>
+<h2>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV</h2><p><span class="todo">Vor- und Nachname, Anschrift wie oben</span></p></div>
+</main>
+<script src="assets/i18n.js"></script>
+<script>msApplyI18n(); document.addEventListener("ms:lang", msApplyI18n);</script>
+</body>
+</html>

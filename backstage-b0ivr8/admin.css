@@ -56,3 +56,16 @@ select:focus, .admin input:focus { outline: none; border-color: var(--lime); }
 
 .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--lime); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-family: var(--mono); font-size: .75rem; text-transform: uppercase; font-weight: 700; z-index: 20; }
 .demo-note { margin-top: 24px; padding: 14px 18px; border-radius: 14px; background: #3a2f00; color: #ffd84a; font-size: .9rem; }
+
+/* Tabs + Anfragen */
+.a-tabs { display: inline-flex; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 999px; }
+.a-tabs button { background: none; border: 0; color: var(--ink-dim); font: inherit; padding: 8px 16px; border-radius: 999px; cursor: pointer; text-transform: uppercase; }
+.a-tabs button[aria-pressed="true"] { background: var(--lime); color: var(--bg); font-weight: 700; }
+.a-tabs.small button { padding: 6px 12px; font-size: .7rem; }
+.a-tabs .count { display: inline-grid; place-items: center; min-width: 20px; height: 20px; border-radius: 99px; background: #ff5a4e; color: #fff; font-size: .7rem; margin-left: 4px; }
+.req-info { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+.req-msg { white-space: pre-wrap; background: var(--bg); padding: 14px 16px; border-radius: 12px; }
+.req-links { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 4px; }
+.req-links a, .linklike { color: var(--lime); background: none; border: 0; font: inherit; cursor: pointer; padding: 0; text-decoration: underline; text-underline-offset: 3px; }
+.req a { color: inherit; }
+@media (max-width: 900px) { .a-top { flex-wrap: wrap; gap: 10px; } }

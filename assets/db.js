@@ -101,7 +101,7 @@
     },
 
     // Rückgabe: { status: "ok" | "already" | "closed", genre?, code? }
-    async cast(ev, genre) {
+    async cast(ev, genre, insta = false) {
       if (DEMO) {
         const mine = ls.get("ms-vote-" + ev.id, null);
         if (mine) return { status: "already", ...mine };
@@ -109,11 +109,12 @@
         if (!fresh || !fresh.is_open) return { status: "closed" };
         const k = "ms-demo-votes-" + ev.id, c = ls.get(k, {});
         c[genre] = (c[genre] || 0) + 1; ls.set(k, c);
+        if (insta) ls.set("ms-demo-insta-" + ev.id, ls.get("ms-demo-insta-" + ev.id, 0) + 1);
         const v = { genre, code: randCode() };
         ls.set("ms-vote-" + ev.id, v);
         return { status: "ok", ...v };
       }
-      const res = await rpc("cast_vote", { p_event: ev.id, p_genre: genre, p_device: deviceId() });
+      const res = await rpc("cast_vote", { p_event: ev.id, p_genre: genre, p_device: deviceId(), p_insta: !!insta });
       if (res && res.genre) ls.set("ms-vote-" + ev.id, { genre: res.genre, code: res.code });
       return res;
     },
@@ -123,6 +124,54 @@
       const out = {};
       (await rpc("vote_results", { p_event: ev.id })).forEach((r) => (out[r.genre] = Number(r.votes)));
       return out;
+    },
+
+    // ── Anfragen (Künstler:innen / Locations) ──
+    // data: Felder der Tabelle "requests"; files: FileList/Array<File>
+    async submitRequest(data, files = []) {
+      const id = crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
+      const paths = [];
+      for (const f of files) {
+        const clean = f.name.normalize("NFKD").replace(/[^\w.\-]+/g, "_").slice(-80);
+        const path = `${data.kind}/${id}/${clean}`;
+        if (!DEMO) {
+          const r = await fetch(`${URL_}/storage/v1/object/requests/${path}`, {
+            method: "POST", headers: { apikey: C.supabaseAnonKey, "Content-Type": f.type || "application/octet-stream" }, body: f,
+          });
+          if (!r.ok) throw new Error("UPLOAD:" + (await r.text()));
+        }
+        paths.push(path);
+      }
+      const row = { ...data, files: paths };
+      if (DEMO) { const all = ls.get("ms-demo-requests", []); all.unshift({ ...row, id, created_at: new Date().toISOString(), status: "new", notes: "" }); ls.set("ms-demo-requests", all); return; }
+      await req("/rest/v1/requests", { method: "POST", body: JSON.stringify(row), headers: Object.assign(headers(false), { Prefer: "return=minimal" }) });
+    },
+
+    async listRequests() {
+      if (DEMO) return ls.get("ms-demo-requests", []);
+      return req("/rest/v1/requests?select=*&order=created_at.desc", {}, true);
+    },
+
+    async updateRequest(id, patch) {
+      if (DEMO) { ls.set("ms-demo-requests", ls.get("ms-demo-requests", []).map((r) => (r.id === id ? { ...r, ...patch } : r))); return; }
+      await req(`/rest/v1/requests?id=eq.${id}`, { method: "PATCH", body: JSON.stringify(patch) }, true);
+    },
+
+    async deleteRequest(id) {
+      if (DEMO) { ls.set("ms-demo-requests", ls.get("ms-demo-requests", []).filter((r) => r.id !== id)); return; }
+      await req(`/rest/v1/requests?id=eq.${id}`, { method: "DELETE" }, true);
+    },
+
+    // Zeitlich begrenzter Download-Link für einen Anhang (nur Admins)
+    async fileUrl(path) {
+      if (DEMO) return null;
+      const r = await req(`/storage/v1/object/sign/requests/${path}`, { method: "POST", body: JSON.stringify({ expiresIn: 600 }) }, true);
+      return URL_ + "/storage/v1" + r.signedURL;
+    },
+
+    async voteStats(ev) { // { total, insta } – nur für Admins
+      if (DEMO) { const r = ls.get("ms-demo-votes-" + ev.id, {}); return { total: Object.values(r).reduce((a, b) => a + b, 0), insta: ls.get("ms-demo-insta-" + ev.id, 0) }; }
+      return req("/rest/v1/rpc/vote_stats", { method: "POST", body: JSON.stringify({ p_event: ev.id }) }, true);
     },
 
     // ── Admin ──

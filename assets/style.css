@@ -1,4 +1,9 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;700;800&family=Space+Mono:wght@400;700&display=swap");
+/* Schriften lokal gehostet (keine Verbindung zu Google) */
+@font-face { font-family: "Inter Tight"; font-style: normal; font-weight: 500; font-display: swap; src: url("fonts/inter-tight-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Inter Tight"; font-style: normal; font-weight: 700; font-display: swap; src: url("fonts/inter-tight-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "Inter Tight"; font-style: normal; font-weight: 800; font-display: swap; src: url("fonts/inter-tight-latin-800-normal.woff2") format("woff2"); }
+@font-face { font-family: "Space Mono"; font-style: normal; font-weight: 400; font-display: swap; src: url("fonts/space-mono-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Space Mono"; font-style: normal; font-weight: 700; font-display: swap; src: url("fonts/space-mono-latin-700-normal.woff2") format("woff2"); }
 
 :root {
   --bg: #121212;
@@ -242,3 +247,61 @@ footer .wrap { display: flex; justify-content: space-between; gap: 20px; flex-wr
 .ticket-status p { color: var(--ink-dim); } .ticket-status strong { color: var(--ink); text-transform: uppercase; }
 .ticket-clock { margin-top: 14px; color: var(--ink-dim); font-size: .75rem; }
 .bar-row .name.genre { font-family: var(--mono); text-transform: uppercase; letter-spacing: .02em; }
+
+/* ── Instagram-Buttons ───────────────────────────── */
+.ig { width: 18px; height: 18px; flex: none; }
+.icon-btn { display: inline-grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line); color: var(--ink); transition: color .15s, border-color .15s, background .15s; }
+.icon-btn:hover { color: var(--bg); background: var(--lime); border-color: var(--lime); }
+.nav-ig { display: block !important; }
+.ig-pill { display: inline-flex; align-items: center; gap: 10px; margin-top: 22px; padding: 8px 8px 8px 14px; border-radius: 999px; border: 1px solid var(--line); text-decoration: none; font-family: var(--mono); font-size: .8rem; color: var(--ink); transition: border-color .15s; }
+.ig-pill:hover { border-color: var(--lime); }
+.ig-pill .ig-follow { background: var(--lime); color: var(--bg); border-radius: 999px; padding: 5px 12px; font-weight: 700; text-transform: uppercase; font-size: .72rem; }
+.btn .ig { width: 16px; height: 16px; }
+
+/* ── Locations ───────────────────────────────────── */
+.venues { display: grid; grid-template-columns: 1fr 1.2fr; gap: clamp(24px, 6vw, 80px); align-items: end; }
+.venues h2 { margin-top: 10px; }
+.venues p { color: var(--ink-dim); font-size: 1.15rem; max-width: 48ch; }
+@media (max-width: 760px) { .venues { grid-template-columns: 1fr; } }
+
+/* ── Footer ──────────────────────────────────────── */
+.foot { align-items: center; }
+.foot-brand { display: flex; align-items: center; gap: 10px; }
+.foot-brand img { width: 26px; }
+.foot-social { display: flex; align-items: center; gap: 12px; }
+.foot-legal { display: flex; gap: 18px; align-items: center; }
+.foot-legal a { color: var(--ink-dim); text-decoration: none; } .foot-legal a:hover { color: var(--ink); }
+
+/* ── Anfrage-Formular ────────────────────────────── */
+.apply-page { padding-top: 40px; padding-bottom: 90px; max-width: 860px; }
+.apply-tabs { display: inline-flex; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 999px; margin-bottom: 34px; }
+.apply-tabs a { padding: 9px 18px; border-radius: 999px; text-decoration: none; color: var(--ink-dim); }
+.apply-tabs a[aria-selected="true"] { background: var(--lime); color: var(--bg); font-weight: 700; }
+.apply-title { font-size: clamp(2.4rem, 6vw, 4rem); font-weight: 800; letter-spacing: -0.045em; line-height: .95; }
+.apply-lede { color: var(--ink-dim); font-size: 1.1rem; margin: 14px 0 30px; max-width: 52ch; }
+form.apply-form { display: grid; gap: 16px; }
+.apply-form .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.field { display: grid; gap: 6px; }
+.field input, .field textarea { width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg-2); color: var(--ink); font: inherit; font-size: 1rem; }
+.field input:focus, .field textarea:focus { outline: none; border-color: var(--lime); }
+.field textarea { resize: vertical; }
+.field input[type=file] { padding: 12px; font-size: .9rem; }
+.radio-row { border: 0; display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: center; }
+.radio-row legend { margin-bottom: 8px; }
+.radio-row label, .consent { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+input[type=radio], input[type=checkbox] { accent-color: var(--lime); width: 18px; height: 18px; margin-top: 2px; }
+.consent { color: var(--ink-dim); font-size: .92rem; } .consent a { color: var(--ink); }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.err { color: #ff7a70; font-size: .75rem; }
+.apply-done h2 { font-size: 2.6rem; }
+@media (max-width: 640px) { .apply-form .grid2 { grid-template-columns: 1fr; } }
+
+/* ── Instagram-Hinweis vor dem Spiel ─────────────── */
+.vote-tools { display: flex; align-items: center; gap: 14px; }
+.vote-tools .icon-btn { width: 34px; height: 34px; }
+.gate { margin-top: 26px; display: grid; justify-items: start; }
+.gate-logo img { width: 84px; height: 84px; border-radius: 50%; border: 2px solid var(--lime); margin-bottom: 18px; }
+.gate h1 { margin-top: 6px; }
+.gate-btn { width: 100%; justify-content: center; padding: 18px; font-size: .9rem; margin-top: 10px; }
+.gate-btn .ig { width: 18px; height: 18px; }
+.gate-skip { background: none; border: 0; color: var(--ink-dim); text-decoration: underline; text-underline-offset: 3px; margin: 18px auto 0; cursor: pointer; font-size: .75rem; }
