@@ -4,10 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>musik scout · Berlin</title>
-  <meta name="description" content="musik scout – a live music series in Berlin. Three live acts, one DJ, and the audience picks the night’s favourite.">
-  <meta name="theme-color" content="#141414">
+  <meta name="description" content="musik scout – a live music series in Berlin. Live acts, a DJ set, and a game where the crowd picks the sound of the next night.">
+  <meta name="theme-color" content="#121212">
   <meta property="og:title" content="musik scout · Berlin">
-  <meta property="og:description" content="Three live acts, one DJ, and the audience picks the night’s favourite.">
+  <meta property="og:description" content="Live acts, a DJ set, and a game where the crowd picks the sound of the next night.">
+  <meta property="og:image" content="assets/brand/profile.png">
   <link rel="icon" href="assets/logo-static.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/style.css">
 </head>
@@ -17,9 +18,10 @@
   <a class="brand" href="#top"><img src="assets/logo-static.svg" alt=""> musik scout</a>
   <ul class="mono">
     <li><a href="#next" data-i18n="nav.next">Next night</a></li>
-    <li><a href="#how" data-i18n="nav.how">How it works</a></li>
+    <li><a href="#game" data-i18n="nav.game">The game</a></li>
     <li><a href="#archive" data-i18n="nav.archive">Archive</a></li>
-    <li><a href="#play" data-i18n="nav.play">Play</a></li>
+    <li><a href="#artists" data-i18n="nav.artists">Artists</a></li>
+    <li><a href="#support" data-i18n="nav.support">Support</a></li>
     <li class="lang"><button data-lang="en">EN</button><span class="dim">/</span><button data-lang="de">DE</button></li>
   </ul>
 </nav>
@@ -35,10 +37,10 @@
       <p class="lede" data-i18n="hero.lede"></p>
       <div class="cta-row">
         <a class="btn primary" href="#next" data-i18n="hero.cta">Next night</a>
-        <a class="btn" href="#play" data-i18n="hero.play">Apply to play</a>
+        <a class="btn" href="#artists" data-i18n="hero.play">For artists</a>
       </div>
     </div>
-    <div class="hero-logo" id="hero-logo" aria-hidden="true"></div>
+    <div class="hero-logo" aria-hidden="true"><img src="assets/logo.svg" alt=""></div>
   </div>
 </header>
 
@@ -63,36 +65,73 @@
   </div>
 </section>
 
-<section id="archive">
-  <div class="wrap">
-    <div class="section-head"><h2 data-i18n="archive.title">Archive</h2></div>
-    <ul class="archive" id="archive-list"></ul>
+<section id="game">
+  <div class="wrap game">
+    <div>
+      <div class="mono lime">Rules of the game</div>
+      <h2 class="game-title" data-i18n="game.title">The game</h2>
+      <p data-i18n="game.p1"></p>
+      <p><span data-i18n="game.p2"></span> <span class="game-drink" data-i18n="game.drink">free drink.</span></p>
+    </div>
+    <div class="game-wheel">
+      <div id="demo-wheel"></div>
+      <div class="mono dim" style="text-align:center;margin-top:8px" data-i18n="game.try"></div>
+    </div>
   </div>
 </section>
 
-<section id="play">
-  <div class="wrap apply">
+<section id="archive">
+  <div class="wrap">
+    <div class="section-head"><h2 data-i18n="archive.title">Archive</h2></div>
+    <div id="archive-list"></div>
+  </div>
+</section>
+
+<section id="artists">
+  <div class="wrap artists">
     <div>
-      <h2 data-i18n="play.title">Play at musik scout</h2>
-      <p data-i18n="play.p"></p>
+      <div class="mono lime" data-i18n="artists.kicker">Looking for artists / DJs</div>
+      <h2 data-i18n="artists.title">Play at musik scout</h2>
+      <p class="artists-p" data-i18n="artists.p"></p>
+      <ol class="artist-steps">
+        <li><span class="n">1</span><span data-i18n="artists.1"></span></li>
+        <li><span class="n">2</span><span data-i18n="artists.2"></span></li>
+        <li><span class="n">3</span><span data-i18n="artists.3"></span></li>
+      </ol>
+      <div class="cta-row"><a class="btn primary js-insta" href="#" target="_blank" rel="noopener" data-i18n="artists.dm">DM us on Instagram</a></div>
     </div>
-    <form class="apply-form" id="apply-form">
-      <label class="field"><span class="mono dim" data-i18n="play.name"></span><input name="name" required></label>
-      <label class="field"><span class="mono dim" data-i18n="play.email"></span><input name="email" type="email" required></label>
-      <label class="field"><span class="mono dim" data-i18n="play.link"></span><input name="link" type="url" required placeholder="https://"></label>
-      <label class="field"><span class="mono dim" data-i18n="play.msg"></span><textarea name="msg"></textarea></label>
-      <div class="cta-row" style="margin-top:8px;align-items:center">
-        <button class="btn primary" type="submit" data-i18n="play.send">Send</button>
-        <span class="mono dim" style="font-size:.7rem" data-i18n="play.note"></span>
+    <div class="artists-side">
+      <a class="qr-card js-insta" href="#" target="_blank" rel="noopener">
+        <div class="qr" id="qr-insta"></div>
+        <div class="mono js-handle">@musikscout.berlin</div>
+      </a>
+      <div class="video-slot">
+        <div class="play" aria-hidden="true"></div>
+        <div><div class="mono lime" data-i18n="artists.video.t">Live sessions</div><div class="dim" data-i18n="artists.video.p"></div></div>
       </div>
-    </form>
+    </div>
+  </div>
+</section>
+
+<section id="support">
+  <div class="wrap support">
+    <div>
+      <h2 data-i18n="support.title">Support the nights</h2>
+      <p data-i18n="support.p"></p>
+      <div class="cta-row"><a class="btn primary" id="paypal-link" href="#" target="_blank" rel="noopener" data-i18n="support.btn">Donate with PayPal</a></div>
+    </div>
+    <div class="support-qr">
+      <div class="qr" id="qr-paypal"></div>
+      <div class="mono dim" data-i18n="support.scan"></div>
+      <div class="donate-range">€10 – €20</div>
+    </div>
   </div>
 </section>
 
 <footer>
   <div class="wrap mono">
     <span>musik scout · Berlin</span>
-    <a id="insta-link" href="#" target="_blank" rel="noopener" class="lime" data-i18n="foot.follow">Follow on Instagram</a>
+    <a href="#" target="_blank" rel="noopener" class="lime js-insta" data-i18n="foot.follow">Follow on Instagram</a>
     <span class="dim">© <span id="year"></span></span>
   </div>
 </footer>
@@ -101,6 +140,8 @@
 <script src="assets/config.js"></script>
 <script src="assets/i18n.js"></script>
 <script src="assets/db.js"></script>
+<script src="assets/qrcode.js"></script>
+<script src="assets/wheel.js"></script>
 <script src="assets/app.js"></script>
 </body>
 </html>

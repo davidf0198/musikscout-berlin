@@ -9,8 +9,9 @@ Reines HTML/CSS/JS, kein Build-Schritt. Läuft auf jedem statischen Hosting (akt
 | Seite | Wofür |
 |---|---|
 | `index.html` | One-Pager: nächster Abend, Konzept, Archiv mit Gewinnern, Bewerbung „Play at musik scout“ |
-| `vote.html` | Abstimmung fürs Handy (über den QR-Code). Danach: nächster Termin + Instagram |
-| `results.html` | Live-Ergebnis für den Beamer, mit QR-Code. `?hide=1` versteckt die Zahlen bis zur Auflösung |
+| `vote.html` | Das Spiel fürs Handy (über den QR-Code): Genre wählen → Ticket mit Code. Zeigt live, ob das Rad auf dem eigenen Genre gelandet ist |
+| `results.html` | Beamer: Live-Stand der Genre-Stimmen + QR-Code. `?hide=1` versteckt die Zahlen |
+| `spin.html` | Beamer: Glücksrad fürs DJ-Set (Leertaste/Klick). Im Backstage angemeldet → Ergebnis wird gespeichert |
 | `qr.html` | Druckbares A4-Plakat mit QR-Code |
 | `backstage-b0ivr8/` | **Admin-Bereich** (geheimer Link + Login) |
 
@@ -42,9 +43,10 @@ Der anon-Key ist öffentlich gedacht. Schreiben dürfen nur eingeloggte Admins (
 
 ## Am Abend
 
-1. Backstage → Event → **Voting öffnen**
-2. `results.html` auf den Beamer, QR-Plakate an die Bar
-3. Am Ende **Voting schließen**, Gewinner speichern
+1. Backstage → Event → **Abstimmung öffnen**
+2. QR-Plakate aufhängen, `results.html` auf den Beamer
+3. Während des DJ-Sets: Backstage → **Beamer: Rad** → Leertaste. Das Ergebnis erscheint auf allen Tickets; wer gewonnen hat, zeigt das Handy an der Bar (Freigetränk)
+4. Am Ende **Abstimmung schließen**
 
 Pro Handy ist eine Stimme möglich (Geräte-ID + Sperre in der Datenbank). Wer seine Browserdaten löscht, kann erneut abstimmen. Für einen Abend in der Bar ist das ein vernünftiger Kompromiss.
 
@@ -58,7 +60,7 @@ Ein GitHub-Workflow pingt Supabase zweimal pro Woche, damit das kostenlose Proje
 
 ## Sonstiges
 
-- Instagram-Link und Bewerbungs-E-Mail: `assets/data.js`
-- Das Bewerbungsformular öffnet aktuell das Mailprogramm (kein Server nötig).
+- Instagram- und PayPal-Link: `assets/data.js`
+- Fotos/Poster pro Event liegen unter `assets/events/<datum>/`, im Backstage als Pfad eintragen
 - Lokal ansehen: `python3 -m http.server` → http://localhost:8000
 - Ideen und Planung: [`ROADMAP.md`](ROADMAP.md)

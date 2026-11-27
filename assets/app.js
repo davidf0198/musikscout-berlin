@@ -7,6 +7,11 @@
   const fmt = (iso) => iso.split("-").reverse().join(".");
   const act = (a) => (a.link ? `<a href="${esc(a.link)}" target="_blank" rel="noopener">${esc(a.name)}</a>` : esc(a.name));
 
+  function qr(el, url) {
+    const q = qrcode(0, "M"); q.addData(url); q.make();
+    el.innerHTML = q.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+  }
+
   function icsHref(e) {
     const d = e.date.replace(/-/g, "");
     const n = new Date(e.date); n.setDate(n.getDate() + 1);
@@ -20,6 +25,26 @@
       "END:VEVENT", "END:VCALENDAR",
     ].join("\r\n");
     return "data:text/calendar;charset=utf-8," + encodeURIComponent(ics);
+  }
+
+  function archiveCard(e) {
+    const people = [...e.live.map((a) => ({ ...a, role: "Live" })), ...(e.dj ? [{ ...e.dj, role: "DJ" }] : [])];
+    return `<article class="arch">
+      <div class="arch-head">
+        <div><span class="mono lime">${esc(e.edition)}</span> <span class="mono">${esc(e.weekday)} ${fmt(e.date)}</span></div>
+        <div class="mono dim">${esc(e.venue)}</div>
+      </div>
+      <div class="arch-body">
+        ${e.poster ? `<a class="arch-poster" href="${esc(e.poster)}" target="_blank" rel="noopener"><img src="${esc(e.poster)}" alt="${t("archive.poster")} ${esc(e.edition)}" loading="lazy"></a>` : ""}
+        <div class="arch-people">
+          ${people.map((p) => `<figure class="person">
+            ${p.photo ? `<img src="${esc(p.photo)}" alt="${esc(p.name)}" loading="lazy">` : `<div class="ph"></div>`}
+            <figcaption><span class="mono dim">${p.role}</span><strong>${act(p)}</strong></figcaption>
+          </figure>`).join("")}
+        </div>
+      </div>
+      ${e.spin_result ? `<div class="arch-foot mono"><span class="dim">${t("archive.wheel")}</span> <span class="lime">${esc(e.spin_result)}</span></div>` : ""}
+    </article>`;
   }
 
   function render() {
@@ -40,7 +65,7 @@
             ${next.dj ? `<div class="group"><div class="mono lime">${t("next.dj", { time: esc(next.dj.from) })}</div><ul class="lineup"><li>${act(next.dj)}</li></ul></div>` : ""}
           </div>
           <div class="event-foot">
-            <span class="mono">${esc(next.time)}</span>
+            <span class="mono">${esc(next.time)}${next.address ? ` · <span class="dim">${esc(next.address)}</span>` : ""}</span>
             <div class="cta-row" style="margin:0">
               ${next.tickets ? `<a class="btn primary" href="${esc(next.tickets)}" target="_blank" rel="noopener">${t("next.tickets")}</a>` : ""}
               <a class="btn" href="${icsHref(next)}" download="musikscout-${next.id}.ics">${t("next.cal")}</a>
@@ -50,26 +75,20 @@
         </article>`
       : `<p class="empty">${t("next.none")}</p>`;
 
-    $("#archive-list").innerHTML = past.length
-      ? past.map((e) => `<li>
-          <span class="mono lime">${esc(e.edition || "")}</span>
-          <span class="mono">${fmt(e.date)}</span>
-          <span class="acts">${e.live.map((a) => esc(a.name)).join(" · ")}</span>
-          <span class="mono">${e.winner ? `<span class="dim">${t("archive.winner")}:</span> <span class="win">${esc(e.winner)}</span>` : esc(e.venue)}</span>
-        </li>`).join("")
-      : `<li class="empty" style="display:block">${t("archive.empty")}</li>`;
+    $("#archive-list").innerHTML = past.length ? past.map(archiveCard).join("") : `<p class="empty">${t("archive.empty")}</p>`;
   }
 
-  // Bewerbung: öffnet Mailprogramm (kein Backend nötig)
-  $("#apply-form").addEventListener("submit", (ev) => {
-    ev.preventDefault();
-    const f = new FormData(ev.target);
-    const body = `Name: ${f.get("name")}\nEmail: ${f.get("email")}\nMusic: ${f.get("link")}\n\n${f.get("msg") || ""}`;
-    location.href = `mailto:${D.email}?subject=${encodeURIComponent("Play at musik scout: " + f.get("name"))}&body=${encodeURIComponent(body)}`;
-  });
-
-  $("#insta-link").href = D.instagram;
+  // Links & QR-Codes
+  document.querySelectorAll(".js-insta").forEach((a) => (a.href = D.instagram));
+  document.querySelectorAll(".js-handle").forEach((a) => (a.textContent = D.instagramHandle));
+  $("#paypal-link").href = D.paypal;
+  qr($("#qr-insta"), D.instagram);
+  qr($("#qr-paypal"), D.paypal);
   $("#year").textContent = new Date().getFullYear();
+
+  // Demo-Rad im Abschnitt "Das Spiel"
+  const wheel = MSWheel.create($("#demo-wheel"), { interactive: true });
+  wheel.set("jazz");
 
   msApplyI18n();
   document.addEventListener("ms:lang", render);
@@ -79,5 +98,4 @@
     past = events.filter((e) => e.date < today).reverse();
     render();
   }).catch(() => render());
-  $("#hero-logo").innerHTML = '<img src="assets/logo.svg" alt="">';
 })();

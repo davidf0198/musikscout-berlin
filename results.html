@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Live results · musik scout</title>
+  <title>Vote your genre · musik scout</title>
   <meta name="robots" content="noindex">
   <link rel="icon" href="assets/logo-static.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/style.css">
@@ -17,6 +17,7 @@
     </div>
     <div style="text-align:right">
       <img src="assets/logo.svg" alt="" style="width:16vh;margin-left:auto">
+      <a class="mono dim" id="to-spin" href="#" style="font-size:1vw;display:inline-block;margin-top:1vh;text-decoration:none">→ wheel</a>
       <div class="mono" style="font-size:1.4vw;margin-top:1.5vh" data-i18n="res.title"></div>
     </div>
   </div>
@@ -47,19 +48,20 @@
     const voteUrl = new URL("vote.html?e=" + ev.id, location.href).href;
     document.getElementById("url").textContent = voteUrl.replace(/^https?:\/\//, "");
     const qr = qrcode(0, "M"); qr.addData(voteUrl); qr.make();
+    document.getElementById("to-spin").href = "spin.html?e=" + encodeURIComponent(ev.id);
     document.getElementById("qr").innerHTML = qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
 
     const bars = document.getElementById("bars");
-    bars.innerHTML = ev.live.map((a, i) => `<div class="bar-row" data-i="${i}"><div class="name">${esc(a.name)}</div><div class="bar-track"><div class="bar-fill"></div></div><div class="pct">–</div></div>`).join("");
+    bars.innerHTML = ev.genres.map((g, i) => `<div class="bar-row" data-i="${i}"><div class="name genre">${esc(g)}</div><div class="bar-track"><div class="bar-fill"></div></div><div class="pct">–</div></div>`).join("");
 
     async function tick() {
       let r = {};
       try { r = await V.results(ev); } catch (e) { return; }
-      const total = ev.live.reduce((s, a) => s + (r[a.name] || 0), 0);
-      const max = Math.max(0, ...ev.live.map((a) => r[a.name] || 0));
+      const total = ev.genres.reduce((s, g) => s + (r[g] || 0), 0);
+      const max = Math.max(0, ...ev.genres.map((g) => r[g] || 0));
       document.getElementById("total").textContent = total;
-      ev.live.forEach((a, i) => {
-        const n = r[a.name] || 0, row = bars.children[i];
+      ev.genres.forEach((g, i) => {
+        const n = r[g] || 0, row = bars.children[i];
         const pct = total ? Math.round((n / total) * 100) : 0;
         row.querySelector(".bar-fill").style.width = hide ? "0%" : (total ? (n / max) * 100 : 0) + "%";
         row.querySelector(".pct").textContent = hide ? "?" : pct + "%";

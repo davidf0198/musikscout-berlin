@@ -14,7 +14,7 @@
     .sheet .top { display: flex; justify-content: space-between; }
     .sheet .mid { display: grid; align-content: center; justify-items: center; gap: 10mm; text-align: center; }
     .sheet h1 { font-size: 30mm; font-weight: 800; letter-spacing: -0.055em; line-height: .82; }
-    .sheet .ask { font-size: 11mm; font-weight: 800; letter-spacing: -0.04em; line-height: 1; }
+    .sheet .ask { font-family: var(--mono); text-transform: uppercase; font-size: 10mm; font-weight: 800; letter-spacing: -0.04em; line-height: 1; }
     .sheet .qrbig { background: var(--ink); padding: 6mm; border-radius: 6mm; width: 100mm; height: 100mm; }
     .sheet .qrbig svg { width: 100%; height: 100%; }
     .sheet .bottom { display: flex; justify-content: space-between; align-items: flex-end; }
@@ -31,7 +31,7 @@
     <div class="top mono"><span id="venue">Berlin</span><span class="lime" id="date"></span></div>
     <div class="mid">
       <img src="assets/logo-static.svg" alt="" style="width:34mm">
-      <div class="ask">Vote for tonight’s<br>favourite act</div>
+      <div class="ask">Vote your genre.<br><span class="lime">Win a free drink.</span></div>
       <div class="qrbig" id="qr"></div>
       <div class="mono" id="acts" style="font-size:4.2mm"></div>
     </div>
@@ -53,7 +53,7 @@
     const url = new URL("vote.html?e=" + encodeURIComponent(ev.id), location.href).href;
     document.getElementById("venue").innerHTML = "Berlin<br>" + ev.venue;
     document.getElementById("date").innerHTML = ev.weekday + "<br>" + ev.date.split("-").reverse().join(".");
-    document.getElementById("acts").textContent = ev.live.map((a) => a.name).join("  ·  ");
+    document.getElementById("acts").textContent = ev.genres.join("  ·  ").toUpperCase();
     document.getElementById("url").textContent = url.replace(/^https?:\/\//, "");
     const q = qrcode(0, "M"); q.addData(url); q.make();
     document.getElementById("qr").innerHTML = q.createSvgTag({ cellSize: 4, margin: 0, scalable: true });

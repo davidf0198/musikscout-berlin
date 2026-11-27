@@ -3,15 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Vote · musik scout</title>
-  <meta name="theme-color" content="#141414">
+  <title>The game · musik scout</title>
+  <meta name="theme-color" content="#121212">
   <meta name="robots" content="noindex">
   <link rel="icon" href="assets/logo-static.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/style.css">
 </head>
 <body class="vote-page">
   <div class="vote-head">
-    <a href="index.html"><img src="assets/logo.svg" alt="musik scout"></a>
+    <a href="index.html" class="vote-brand"><img src="assets/logo-static.svg" alt=""> musik scout</a>
     <div class="lang mono"><button data-lang="en">EN</button><span class="dim">/</span><button data-lang="de">DE</button></div>
   </div>
   <main class="vote-main" id="app"></main>
@@ -20,15 +20,15 @@
   <script src="assets/config.js"></script>
   <script src="assets/i18n.js"></script>
   <script src="assets/db.js"></script>
+  <script src="assets/wheel.js"></script>
   <script>
   (function () {
     const DB = window.MS_DB, app = document.getElementById("app");
-    let ev = null, nextEv = null, state = "loading", picked = null, busy = false;
+    let ev = null, nextEv = null, state = "loading", picked = null, busy = false, mine = null, wheel = null, poll = null, clock = null;
     const esc = (s) => String(s || "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
     const fmt = (iso) => iso.split("-").reverse().join(".");
     const head = () => `<div class="mono"><span class="lime">${t("vote.kicker")}</span>${ev ? " · " + esc(ev.venue) + " · " + fmt(ev.date) : ""}</div>`;
 
-    // Nach dem Abstimmen: Besucher auf die Seite holen
     const stay = () => `
       <div class="stay">
         <div class="mono dim">${t("vote.stay")}</div>
@@ -41,31 +41,69 @@
           <a class="btn" href="index.html">${t("vote.site")}</a>
         </div>
       </div>`;
-    const notice = (k, extra) => `${head()}<div class="notice" style="margin-top:22px"><h2>${t(k + ".t")}</h2><p>${t(k + ".p")}</p></div>${extra ? stay() : ""}`;
+
+    // Ticket nach der Abstimmung (mit laufender Uhr + Animation, damit ein Screenshot auffällt)
+    function ticket() {
+      const res = ev.spin_result, won = res && res === mine.genre;
+      const status = !res ? `<p>${t("vote.ticket.p", { genre: esc(mine.genre) })}</p>`
+        : `<h2 class="${won ? "lime" : ""}">${t(won ? "vote.win.t" : "vote.lose.t")}</h2><p>${t(won ? "vote.win.p" : "vote.lose.p", { genre: esc(res) })}</p>`;
+      return `${head()}
+        <div class="ticket ${won ? "won" : ""} ${res && !won ? "lost" : ""}">
+          <div class="ticket-top"><span class="mono">${t("vote.ticket")}</span><span class="live-dot" aria-hidden="true"></span></div>
+          <div class="ticket-genre">${esc(mine.genre)}</div>
+          <div class="ticket-code mono">${mine.code ? "#" + esc(mine.code) + " · " : ""}${fmt(ev.date)}</div>
+          <div class="ticket-status">${status}</div>
+          <div class="ticket-clock mono" id="clock"></div>
+        </div>
+        ${stay()}`;
+    }
 
     function render() {
       msApplyI18n();
+      clearInterval(poll); clearInterval(clock); poll = clock = null;
       if (state === "loading") { app.innerHTML = head(); return; }
-      if (!ev || state === "closed") { app.innerHTML = notice("vote.closed", true); return; }
-      if (state === "thanks") { app.innerHTML = notice("vote.thanks", true); return; }
-      if (state === "already") { app.innerHTML = notice("vote.done", true); return; }
+      if (!ev || state === "closed") {
+        app.innerHTML = `${head()}<div class="notice" style="margin-top:22px"><h2>${t("vote.closed.t")}</h2><p>${t("vote.closed.p")}</p></div>${stay()}`;
+        return;
+      }
+      if (state === "ticket") {
+        app.innerHTML = ticket();
+        const tick = () => { const c = document.getElementById("clock"); if (c) c.textContent = new Date().toLocaleTimeString("de-DE"); };
+        tick(); clock = setInterval(tick, 1000);
+        if (!ev.spin_result) poll = setInterval(refresh, 8000); // wartet auf das Rad
+        return;
+      }
       app.innerHTML = `${head()}
         <h1>${t("vote.title")}</h1>
         <p class="sub">${t("vote.sub")}</p>
-        <div class="choices">${ev.live.map((a) => `<button class="choice" aria-pressed="${picked === a.name}" data-act="${esc(a.name)}">${esc(a.name)}<span class="dot"></span></button>`).join("")}</div>
-        <button class="btn primary vote-submit" id="send" ${picked && !busy ? "" : "disabled"}>${t("vote.send")}</button>
+        <div class="vote-wheel" id="wheel"></div>
+        <button class="btn primary vote-submit" id="send" ${picked && !busy ? "" : "disabled"}>${picked ? t("vote.send") + " · " + esc(picked) : t("vote.pick")}</button>
         <p class="mono dim" id="err" style="margin-top:14px;font-size:.72rem"></p>`;
+      wheel = MSWheel.create(document.getElementById("wheel"), {
+        genres: ev.genres, interactive: true,
+        onPick: (g) => { picked = g; const b = document.getElementById("send"); b.disabled = false; b.textContent = t("vote.send") + " · " + g; },
+      });
+      if (picked) wheel.set(picked);
+    }
+
+    async function refresh() {
+      try {
+        const fresh = await DB.getEvent(ev.id);
+        if (fresh && fresh.spin_result !== ev.spin_result) { ev = fresh; render(); }
+      } catch (e) {}
     }
 
     app.addEventListener("click", async (e) => {
-      const c = e.target.closest(".choice");
-      if (c) { picked = c.dataset.act; render(); return; }
-      if (e.target.id === "send" && picked && !busy) {
-        busy = true; render();
-        try { state = await DB.cast(ev, picked); if (state === "ok") state = "thanks"; }
-        catch (err) { busy = false; render(); document.getElementById("err").textContent = t("vote.err"); return; }
-        busy = false; render();
+      if (e.target.id !== "send" || !picked || busy) return;
+      busy = true; e.target.disabled = true;
+      try {
+        const r = await DB.cast(ev, picked);
+        if (r.status === "closed") state = "closed";
+        else { mine = { genre: r.genre || picked, code: r.code || "" }; state = "ticket"; }
+      } catch (err) {
+        busy = false; render(); document.getElementById("err").textContent = t("vote.err"); return;
       }
+      busy = false; render();
     });
     document.addEventListener("ms:lang", render);
     if (DB.DEMO) document.body.insertAdjacentHTML("beforeend", `<div class="demo-flag" data-i18n="vote.demo"></div>`);
@@ -76,9 +114,8 @@
         const evs = await DB.listEvents();
         ev = await DB.currentEvent();
         if (ev) nextEv = evs.find((e) => e.date > ev.date && e.date >= DB.today()) || null;
-        if (!ev) state = "closed";
-        else if (DB.hasVoted(ev)) state = "already";
-        else state = ev.is_open ? "open" : "closed";
+        if (ev) mine = await DB.myVote(ev);
+        state = !ev ? "closed" : mine ? "ticket" : ev.is_open ? "open" : "closed";
       } catch (e) { state = "closed"; }
       render();
     })();

@@ -1,6 +1,6 @@
 .admin { min-height: 100vh; }
 .a-wrap { max-width: 980px; margin: 0 auto; padding: 0 var(--pad) 80px; }
-.a-top { display: flex; justify-content: space-between; align-items: center; padding: 20px var(--pad); border-bottom: 1px solid var(--line); position: sticky; top: 0; background: rgba(20,20,20,.9); backdrop-filter: blur(10px); z-index: 5; }
+.a-top { display: flex; justify-content: space-between; align-items: center; padding: 20px var(--pad); border-bottom: 1px solid var(--line); position: sticky; top: 0; background: rgba(18,18,18,.9); backdrop-filter: blur(10px); z-index: 5; }
 .a-top .brand { display: flex; gap: 10px; align-items: center; font-weight: 800; letter-spacing: -0.02em; }
 .a-top .brand img { width: 28px; }
 .a-top .brand .mono { color: var(--lime); }
@@ -50,7 +50,7 @@ select:focus, .admin input:focus { outline: none; border-color: var(--lime); }
 .editor fieldset { border: 1px solid var(--line); border-radius: 18px; padding: 20px; display: grid; gap: 14px; }
 .editor legend { font-family: var(--mono); text-transform: uppercase; font-size: .75rem; color: var(--lime); padding: 0 8px; }
 .editor .field input { background: var(--bg); }
-.act-row { display: grid; grid-template-columns: 1fr 1.3fr auto; gap: 10px; }
+.act-row { display: grid; grid-template-columns: 1fr 1.2fr 1.2fr auto; gap: 10px; }
 .hint { color: var(--ink-dim); font-size: .85rem; }
 @media (max-width: 700px) { .editor .grid2, .editor .grid3, .act-row { grid-template-columns: 1fr; } }
 

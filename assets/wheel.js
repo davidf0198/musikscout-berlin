@@ -1,0 +1,70 @@
+// Plattenteller-Rad im musik-scout-Stil: Genre-Auswahl (Handy) und Glücksrad (Beamer).
+(function () {
+  const REC = "<g class=\"rec\"><g fill=\"#e8e6e1\"><path d=\"M564.5 260.0 L564.5 174.0 L608.1 177.0 L596.4 262.2Z\"/><path d=\"M605.3 263.4 L617.0 178.2 L659.8 187.1 L636.6 269.9Z\"/><path d=\"M645.3 272.3 L668.5 189.5 L709.7 204.2 L675.4 283.0Z\"/><path d=\"M683.6 286.6 L717.9 207.7 L756.7 227.9 L712.0 301.3Z\"/><path d=\"M719.7 306.0 L764.4 232.5 L800.1 257.7 L745.8 324.4Z\"/><path d=\"M807.7 390.7 L877.9 341.1 L900.7 378.4 L824.3 418.0Z\"/><path d=\"M828.4 426.0 L904.8 386.4 L922.2 426.5 L841.2 455.3Z\"/><path d=\"M844.2 463.8 L925.2 435.0 L937.0 477.1 L852.8 494.6Z\"/><path d=\"M854.6 503.4 L938.8 485.9 L944.8 529.2 L859.0 535.0Z\"/><path d=\"M859.6 544.0 L945.4 538.1 L945.4 581.9 L859.6 576.0Z\"/><path d=\"M859.0 585.0 L944.8 590.8 L938.8 634.1 L854.6 616.6Z\"/><path d=\"M852.8 625.4 L937.0 642.9 L925.2 685.0 L844.2 656.2Z\"/><path d=\"M841.2 664.7 L922.2 693.5 L904.8 733.6 L828.4 694.0Z\"/><path d=\"M824.3 702.0 L900.7 741.6 L877.9 778.9 L807.7 729.3Z\"/><path d=\"M802.5 736.7 L872.8 786.3 L845.2 820.2 L782.3 761.5Z\"/><path d=\"M776.2 768.1 L839.0 826.8 L807.1 856.6 L752.8 789.9Z\"/><path d=\"M745.8 795.6 L800.1 862.3 L764.4 887.5 L719.7 814.0Z\"/><path d=\"M712.0 818.7 L756.7 892.1 L717.9 912.3 L683.6 833.4Z\"/><path d=\"M675.4 837.0 L709.7 915.8 L668.5 930.5 L645.3 847.7Z\"/><path d=\"M636.6 850.1 L659.8 932.9 L617.0 941.8 L605.3 856.6Z\"/><path d=\"M596.4 857.8 L608.1 943.0 L564.5 946.0 L564.5 860.0Z\"/><path d=\"M555.5 860.0 L555.5 946.0 L511.9 943.0 L523.6 857.8Z\"/><path d=\"M514.7 856.6 L503.0 941.8 L460.2 932.9 L483.4 850.1Z\"/><path d=\"M474.7 847.7 L451.5 930.5 L410.3 915.8 L444.6 837.0Z\"/><path d=\"M436.4 833.4 L402.1 912.3 L363.3 892.1 L408.0 818.7Z\"/><path d=\"M400.3 814.0 L355.6 887.5 L319.9 862.3 L374.2 795.6Z\"/><path d=\"M367.2 789.9 L312.9 856.6 L281.0 826.8 L343.8 768.1Z\"/><path d=\"M337.7 761.5 L274.8 820.2 L247.2 786.3 L317.5 736.7Z\"/><path d=\"M312.3 729.3 L242.1 778.9 L219.3 741.6 L295.7 702.0Z\"/><path d=\"M291.6 694.0 L215.2 733.6 L197.8 693.5 L278.8 664.7Z\"/><path d=\"M275.8 656.2 L194.8 685.0 L183.0 642.9 L267.2 625.4Z\"/><path d=\"M265.4 616.6 L181.2 634.1 L175.2 590.8 L261.0 585.0Z\"/><path d=\"M260.4 576.0 L174.6 581.9 L174.6 538.1 L260.4 544.0Z\"/><path d=\"M261.0 535.0 L175.2 529.2 L181.2 485.9 L265.4 503.4Z\"/><path d=\"M267.2 494.6 L183.0 477.1 L194.8 435.0 L275.8 463.8Z\"/><path d=\"M278.8 455.3 L197.8 426.5 L215.2 386.4 L291.6 426.0Z\"/><path d=\"M295.7 418.0 L219.3 378.4 L242.1 341.1 L312.3 390.7Z\"/><path d=\"M317.5 383.3 L247.2 333.7 L274.8 299.8 L337.7 358.5Z\"/><path d=\"M343.8 351.9 L281.0 293.2 L312.9 263.4 L367.2 330.1Z\"/><path d=\"M374.2 324.4 L319.9 257.7 L355.6 232.5 L400.3 306.0Z\"/><path d=\"M408.0 301.3 L363.3 227.9 L402.1 207.7 L436.4 286.6Z\"/><path d=\"M444.6 283.0 L410.3 204.2 L451.5 189.5 L474.7 272.3Z\"/><path d=\"M483.4 269.9 L460.2 187.1 L503.0 178.2 L514.7 263.4Z\"/><path d=\"M523.6 262.2 L511.9 177.0 L555.5 174.0 L555.5 260.0Z\"/></g><circle cx=\"560\" cy=\"560\" r=\"292\" fill=\"#e8e6e1\"/><circle cx=\"560\" cy=\"560\" r=\"230\" fill=\"none\" stroke=\"#121212\" stroke-width=\"10\"/><circle cx=\"560\" cy=\"560\" r=\"165\" fill=\"none\" stroke=\"#121212\" stroke-width=\"10\"/><circle cx=\"560\" cy=\"560\" r=\"105\" fill=\"#121212\"/><circle cx=\"560\" cy=\"560\" r=\"84\" fill=\"#cfff3d\"/><circle cx=\"560\" cy=\"560\" r=\"21\" fill=\"#121212\"/></g><g class=\"orbit\"><circle cx=\"800.4\" cy=\"311.1\" r=\"26\" fill=\"#cfff3d\"/></g>";
+  const C = 560, ARC_R = 352, LABEL_R = 450, DOT_START = 44; // Grad, Position des Punkts im Logo
+  const rad = (a) => ((a - 90) * Math.PI) / 180;
+  const pt = (a, r) => [C + r * Math.cos(rad(a)), C + r * Math.sin(rad(a))];
+  const arcPath = (a0, a1, r) => {
+    const [x0, y0] = pt(a0, r), [x1, y1] = pt(a1, r);
+    return `M${x0.toFixed(1)} ${y0.toFixed(1)} A${r} ${r} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`;
+  };
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+  function create(el, opts = {}) {
+    const genres = opts.genres || ["rap", "jazz", "indie"];
+    const n = genres.length, span = 360 / n, gap = 14;
+    const center = (i) => i * span; // erstes Genre oben
+    let rot = 0, selected = null, spinning = false;
+
+    el.innerHTML = `<svg class="wheel" viewBox="0 0 1120 1120" role="img" aria-label="${esc(genres.join(", "))}">
+      <g class="w-arcs">${genres.map((g, i) => `<path class="w-arc" data-g="${esc(g)}" d="${arcPath(center(i) - span / 2 + gap / 2, center(i) + span / 2 - gap / 2, ARC_R)}"/>`).join("")}</g>
+      <g class="w-rec" style="transform-origin:560px 560px"><g transform="translate(560 560) scale(.8) translate(-560 -560)">${REC}</g></g>
+      <g class="w-labels">${genres.map((g, i) => { const [x, y] = pt(center(i), LABEL_R); return `<text class="w-label" data-g="${esc(g)}" x="${x.toFixed(1)}" y="${(y + 22).toFixed(1)}" text-anchor="middle">${esc(g)}</text>`; }).join("")}</g>
+      ${opts.interactive ? genres.map((g, i) => `<path class="w-hit" data-g="${esc(g)}" d="M560 560 L${pt(center(i) - span / 2, 560).join(" ")} A560 560 0 0 1 ${pt(center(i) + span / 2, 560).join(" ")} Z"/>`).join("") : ""}
+      ${opts.centerButton ? `<circle class="w-center" cx="560" cy="560" r="70"/>` : ""}
+    </svg>`;
+    const svg = el.querySelector("svg"), recG = svg.querySelector(".w-rec");
+
+    function highlight(g) {
+      selected = g;
+      svg.querySelectorAll("[data-g]").forEach((x) => x.classList.toggle("on", x.dataset.g === g));
+    }
+    // Dreht so, dass der Punkt im Bereich des Genres landet
+    function turnTo(g, { turns = 0, duration = 0.9, jitter = 0 } = {}) {
+      const i = genres.indexOf(g); if (i < 0) return Promise.resolve();
+      const target = center(i) + (Math.random() * 2 - 1) * jitter * (span / 2 - gap);
+      let delta = (((target - DOT_START - rot) % 360) + 360) % 360;
+      rot += delta + turns * 360;
+      recG.style.transition = `transform ${duration}s cubic-bezier(.15,.65,.12,1)`;
+      recG.style.transform = `rotate(${rot}deg)`;
+      return new Promise((res) => setTimeout(res, duration * 1000 + 50));
+    }
+
+    if (opts.interactive) {
+      svg.addEventListener("click", (e) => {
+        const t = e.target.closest("[data-g]"); if (!t || spinning) return;
+        highlight(t.dataset.g); turnTo(t.dataset.g, { duration: 0.8 });
+        opts.onPick && opts.onPick(t.dataset.g);
+      });
+    }
+
+    return {
+      svg, genres, highlight, turnTo,
+      get selected() { return selected; },
+      get spinning() { return spinning; },
+      // Glücksrad: zufälliges Genre (oder vorgegebenes), lange Drehung
+      async spin(forced) {
+        if (spinning) return null;
+        spinning = true; highlight(null); svg.classList.add("spinning");
+        const g = forced || genres[Math.floor(Math.random() * genres.length)];
+        await turnTo(g, { turns: 6, duration: 6.5, jitter: 0.8 });
+        svg.classList.remove("spinning"); highlight(g); spinning = false;
+        return g;
+      },
+      // Ohne Animation auf ein Genre stellen
+      set(g) { recG.style.transition = "none"; const d = turnTo(g, { duration: 0 }); highlight(g); return d; },
+    };
+  }
+
+  window.MSWheel = { create };
+})();
