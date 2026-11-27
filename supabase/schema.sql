@@ -25,6 +25,7 @@ create table if not exists events (
 alter table events add column if not exists poster text default '';
 alter table events add column if not exists genres jsonb not null default '["rap","jazz","indie"]';
 alter table events add column if not exists spin_result text default '';
+alter table if exists votes add column if not exists insta boolean not null default false;
 
 create table if not exists votes (
   id         bigint generated always as identity primary key,
@@ -32,6 +33,7 @@ create table if not exists votes (
   genre      text not null,
   device_id  text not null,
   code       text not null,                  -- kurzer Code, den der Gast an der Bar zeigt
+  insta      boolean not null default false, -- hat vor dem Spiel auf "Follow on Instagram" getippt (anonym)
   created_at timestamptz not null default now(),
   unique (event_id, device_id)               -- eine Stimme pro Handy und Abend
 );
@@ -72,7 +74,8 @@ grant select on admins to authenticated;
 -- ── Funktionen fürs Spiel ─────────────────────────────────────────────
 
 -- Gibt {"status":"ok|already|closed","genre":"…","code":"…"} zurück
-create or replace function cast_vote(p_event text, p_genre text, p_device text)
+drop function if exists cast_vote(text, text, text);
+create or replace function cast_vote(p_event text, p_genre text, p_device text, p_insta boolean default false)
 returns json language plpgsql security definer set search_path = public as $$
 declare
   v_code text;
@@ -86,7 +89,7 @@ begin
     return json_build_object('status', 'closed');
   end if;
   v_code := upper(substr(md5(random()::text || clock_timestamp()::text || p_device), 1, 4));
-  insert into votes (event_id, genre, device_id, code) values (p_event, p_genre, left(p_device, 64), v_code);
+  insert into votes (event_id, genre, device_id, code, insta) values (p_event, p_genre, left(p_device, 64), v_code, coalesce(p_insta, false));
   return json_build_object('status', 'ok', 'genre', p_genre, 'code', v_code);
 exception when unique_violation then
   return json_build_object('status', 'already');
@@ -99,6 +102,16 @@ returns json language sql security definer set search_path = public as $$
   where event_id = p_event and device_id = left(p_device, 64);
 $$;
 
+-- Statistik fürs Backstage: Stimmen gesamt + wie viele vorher auf Instagram getippt haben
+create or replace function vote_stats(p_event text)
+returns json language sql security definer set search_path = public as $$
+  select case when is_admin() then
+    json_build_object('total', count(*), 'insta', count(*) filter (where insta))
+  else null end
+  from votes where event_id = p_event;
+$$;
+grant execute on function vote_stats(text) to authenticated;
+
 create or replace function vote_results(p_event text)
 returns table (genre text, votes bigint) language sql security definer set search_path = public as $$
   select g, count(v.id)
@@ -109,8 +122,54 @@ returns table (genre text, votes bigint) language sql security definer set searc
   group by g;
 $$;
 
-grant execute on function cast_vote(text, text, text), my_vote(text, text), vote_results(text) to anon, authenticated;
+grant execute on function cast_vote(text, text, text, boolean), my_vote(text, text), vote_results(text) to anon, authenticated;
 grant execute on function is_admin() to authenticated;
+
+-- ── Anfragen (Künstler:innen & Locations) ─────────────────────────────
+
+create table if not exists requests (
+  id          uuid primary key default gen_random_uuid(),
+  created_at  timestamptz not null default now(),
+  kind        text not null check (kind in ('artist', 'venue')),
+  name        text not null,                 -- Künstler-/Bandname bzw. Name der Location
+  contact     text default '',               -- Ansprechperson
+  email       text not null,
+  phone       text default '',
+  instagram   text default '',
+  city        text default '',
+  genre       text default '',
+  links       text default '',               -- Spotify, SoundCloud, YouTube … (eine pro Zeile)
+  message     text default '',               -- kurze Vorstellung
+  details     jsonb not null default '{}',   -- weitere Felder (Kapazität, Technik, …)
+  files       jsonb not null default '[]',   -- Pfade im privaten Storage-Bucket "requests"
+  status      text not null default 'new' check (status in ('new', 'contacted', 'booked', 'archived')),
+  notes       text default ''                -- interne Notizen
+);
+alter table requests enable row level security;
+
+drop policy if exists requests_insert on requests;
+drop policy if exists requests_admin  on requests;
+create policy requests_insert on requests for insert to anon, authenticated
+  with check (status = 'new' and notes = '' and length(name) between 1 and 200 and length(email) between 3 and 200
+              and length(coalesce(message, '')) <= 5000 and length(coalesce(links, '')) <= 3000);
+create policy requests_admin on requests for all to authenticated using (is_admin()) with check (is_admin());
+
+grant insert on requests to anon, authenticated;
+grant select, update, delete on requests to authenticated;
+
+-- Privater Speicher für Anhänge (Soundprobe, EPK, Fotos). Hochladen darf jeder, ansehen nur Admins.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('requests', 'requests', false, 26214400,
+        array['audio/mpeg','audio/mp4','audio/x-m4a','audio/wav','audio/x-wav','audio/aac','audio/ogg',
+              'application/pdf','image/jpeg','image/png','image/webp'])
+on conflict (id) do update set public = false, file_size_limit = excluded.file_size_limit, allowed_mime_types = excluded.allowed_mime_types;
+
+drop policy if exists requests_files_upload on storage.objects;
+drop policy if exists requests_files_admin  on storage.objects;
+create policy requests_files_upload on storage.objects for insert to anon, authenticated
+  with check (bucket_id = 'requests');
+create policy requests_files_admin on storage.objects for all to authenticated
+  using (bucket_id = 'requests' and public.is_admin()) with check (bucket_id = 'requests' and public.is_admin());
 
 -- ── Erstes Event (Archiv) ─────────────────────────────────────────────
 
