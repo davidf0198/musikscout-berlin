@@ -171,6 +171,38 @@ create policy requests_files_upload on storage.objects for insert to anon, authe
 create policy requests_files_admin on storage.objects for all to authenticated
   using (bucket_id = 'requests' and public.is_admin()) with check (bucket_id = 'requests' and public.is_admin());
 
+-- ── Feedback-Board (Wünsche, Vorschläge, Abnahme) ─────────────────────
+
+create table if not exists board_items (
+  id          uuid primary key default gen_random_uuid(),
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now(),
+  author      text not null default coalesce(auth.jwt() ->> 'email', ''),
+  kind        text not null default 'wish' check (kind in ('wish', 'proposal', 'bug')),
+  title       text not null check (length(title) between 1 and 200),
+  body        text default '',
+  link        text default '',               -- z. B. Vorschau-Link oder Drive-Ordner
+  status      text not null default 'open'
+              check (status in ('open', 'planned', 'staging', 'approved', 'rejected', 'done'))
+);
+
+create table if not exists board_comments (
+  id          uuid primary key default gen_random_uuid(),
+  item_id     uuid not null references board_items(id) on delete cascade,
+  created_at  timestamptz not null default now(),
+  author      text not null default coalesce(auth.jwt() ->> 'email', ''),
+  body        text not null default '',
+  action      text default ''                -- '', 'approved', 'rejected', 'changes', 'staging', 'done' …
+);
+
+alter table board_items enable row level security;
+alter table board_comments enable row level security;
+drop policy if exists board_items_admin on board_items;
+drop policy if exists board_comments_admin on board_comments;
+create policy board_items_admin on board_items for all to authenticated using (is_admin()) with check (is_admin());
+create policy board_comments_admin on board_comments for all to authenticated using (is_admin()) with check (is_admin());
+grant select, insert, update, delete on board_items, board_comments to authenticated;
+
 -- ── Erstes Event (Archiv) ─────────────────────────────────────────────
 
 insert into events (id, edition, date, venue, address, time_label, poster, live, dj)

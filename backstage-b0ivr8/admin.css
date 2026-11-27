@@ -69,3 +69,22 @@ select:focus, .admin input:focus { outline: none; border-color: var(--lime); }
 .req-links a, .linklike { color: var(--lime); background: none; border: 0; font: inherit; cursor: pointer; padding: 0; text-decoration: underline; text-underline-offset: 3px; }
 .req a { color: inherit; }
 @media (max-width: 900px) { .a-top { flex-wrap: wrap; gap: 10px; } }
+
+/* Konto-Dialog */
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: grid; place-items: center; z-index: 30; padding: 20px; }
+.modal-box { width: 100%; max-width: 420px; background: var(--bg-2); border: 1px solid var(--line); border-radius: 20px; padding: 26px; display: grid; gap: 14px; }
+
+/* Board */
+.board-form { padding: 20px; display: grid; gap: 14px; margin-bottom: 18px; }
+.kind { display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: .68rem; text-transform: uppercase; border: 1px solid var(--line); }
+.k-wish { border-color: var(--lime); color: var(--lime); }
+.k-proposal { border-color: #7fb6ff; color: #7fb6ff; }
+.k-bug { border-color: #ff7a70; color: #ff7a70; }
+.bi.st-staging { border-color: var(--lime); }
+.bi.st-done, .bi.st-rejected { opacity: .65; }
+.thread { display: grid; gap: 10px; border-left: 2px solid var(--line); padding-left: 14px; }
+.cmt .mono { font-size: .68rem; margin-bottom: 2px; }
+.act-approved, .act-done { color: var(--lime); } .act-rejected { color: #ff7a70; } .act-changes { color: #ffd84a; }
+.cmt-row { display: flex; gap: 8px; } .cmt-row input { flex: 1; }
+.radio-row { display: flex; gap: 18px; flex-wrap: wrap; }
+.radio-row label { display: flex; gap: 8px; align-items: center; cursor: pointer; }

@@ -1,4 +1,4 @@
-// Backstage: manage events, run the game, handle requests. English by default, German toggle.
+// Backstage: manage events, run the game, handle requests, feedback board, account. English by default, German toggle.
 (function () {
   const DB = window.MS_DB, app = document.getElementById("app");
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -8,6 +8,17 @@
   // ── Texts ──
   const TX = {
     en: {
+      tabBoard: "Board", account: "Account", newPw: "New password", newPw2: "Repeat new password", pwHint: "At least 10 characters.",
+      pwSave: "Change password", pwMismatch: "The passwords don’t match.", pwShort: "Too short (min. 10 characters).", pwDone: "Password changed",
+      pwDemo: "Not available in demo mode.", close: "Close",
+      boardTitle: "Board", boardIntro: "Wishes, ideas and proposals for the website. Changes are first built on the preview; approve or reject them here before they go live.",
+      newItem: "+ New entry", kindLabel: "Type", k_wish: "Wish", k_proposal: "Proposal", k_bug: "Problem",
+      title: "Title", details: "Details", linkOpt: "Link (preview page, Drive folder …)", add: "Add",
+      s_open: "Open", s_planned: "Planned", s_staging: "On preview – please check", s_approved: "Approved", s_rejected: "Rejected", s_done: "Done",
+      f_active: "Active", f_check: "To check", f_doneRej: "Done / rejected", approve: "Approve", rejectB: "Reject", changes: "Request changes",
+      markStaging: "Mark as on preview", markDone: "Mark as done", comment: "Comment", commentPh: "Write a comment …", send: "Send",
+      a_approved: "approved", a_rejected: "rejected", a_changes: "requested changes", a_staging: "put it on the preview", a_done: "marked it as done", a_planned: "planned it",
+      boardEmpty: "Nothing here yet.", openLink: "Open link ↗", by: "by", confirmItemDelete: "Delete this entry?",
       manage: "Management", email: "Email", password: "Password", signin: "Sign in", loginFail: "Login failed or no admin access.",
       demoLogin: "Demo mode: Supabase is not connected. Any email and password work; changes stay in this browser only.",
       demoNote: "Demo mode: changes are only saved in this browser. Connect Supabase for real events (see README).",
@@ -33,6 +44,17 @@
       capacity: "Capacity", tech: "Equipment", dates: "Dates", type: "Type", fileDemo: "(not available in demo mode)",
     },
     de: {
+      tabBoard: "Board", account: "Konto", newPw: "Neues Passwort", newPw2: "Neues Passwort wiederholen", pwHint: "Mindestens 10 Zeichen.",
+      pwSave: "Passwort ändern", pwMismatch: "Die Passwörter stimmen nicht überein.", pwShort: "Zu kurz (mind. 10 Zeichen).", pwDone: "Passwort geändert",
+      pwDemo: "Im Demo-Modus nicht verfügbar.", close: "Schließen",
+      boardTitle: "Board", boardIntro: "Wünsche, Ideen und Vorschläge für die Website. Änderungen werden zuerst auf der Vorschau umgesetzt; hier werden sie angenommen oder abgelehnt, bevor sie live gehen.",
+      newItem: "+ Neuer Eintrag", kindLabel: "Art", k_wish: "Wunsch", k_proposal: "Vorschlag", k_bug: "Problem",
+      title: "Titel", details: "Details", linkOpt: "Link (Vorschau-Seite, Drive-Ordner …)", add: "Hinzufügen",
+      s_open: "Offen", s_planned: "Geplant", s_staging: "Auf Vorschau – bitte prüfen", s_approved: "Angenommen", s_rejected: "Abgelehnt", s_done: "Erledigt",
+      f_active: "Aktiv", f_check: "Zu prüfen", f_doneRej: "Erledigt / abgelehnt", approve: "Annehmen", rejectB: "Ablehnen", changes: "Änderung wünschen",
+      markStaging: "Als „auf Vorschau“ markieren", markDone: "Als erledigt markieren", comment: "Kommentar", commentPh: "Kommentar schreiben …", send: "Senden",
+      a_approved: "hat angenommen", a_rejected: "hat abgelehnt", a_changes: "wünscht Änderungen", a_staging: "hat es auf die Vorschau gestellt", a_done: "hat es erledigt", a_planned: "hat es eingeplant",
+      boardEmpty: "Noch nichts hier.", openLink: "Link öffnen ↗", by: "von", confirmItemDelete: "Diesen Eintrag löschen?",
       manage: "Verwaltung", email: "E-Mail", password: "Passwort", signin: "Anmelden", loginFail: "Login fehlgeschlagen oder kein Admin-Zugang.",
       demoLogin: "Demo-Modus: Supabase ist nicht verbunden. Beliebige E-Mail und beliebiges Passwort funktionieren, Änderungen bleiben nur in diesem Browser.",
       demoNote: "Demo-Modus: Änderungen werden nur in diesem Browser gespeichert. Für echte Events Supabase verbinden (siehe README).",
@@ -69,6 +91,7 @@
 
   let events = [], openResults = {}, results = {}, stats = {}, view = "list", editing = null, tab = "events";
   let requests = [], reqFilter = "open";
+  let board = { items: [], comments: [] }, boardFilter = "active", boardForm = false;
 
   function toast(msg) {
     const el = document.createElement("div"); el.className = "toast"; el.textContent = msg;
@@ -81,7 +104,7 @@
       console.error(e); toast(T("error"));
     }
   }
-  function rerender() { if (!DB.isAdmin()) return renderLogin(); view === "edit" ? renderEditor() : tab === "requests" ? renderRequests() : renderList(); }
+  function rerender() { if (!DB.isAdmin()) return renderLogin(); view === "edit" ? renderEditor() : tab === "requests" ? renderRequests() : tab === "board" ? renderBoard() : renderList(); }
 
   // ── Login ──
   function renderLogin() {
@@ -110,6 +133,7 @@
     await guard(async () => {
       events = await DB.listEvents();
       requests = await DB.listRequests().catch(() => []);
+      board = await DB.board().catch(() => ({ items: [], comments: [] }));
       for (const id of Object.keys(openResults)) {
         const ev = events.find((e) => e.id === id); if (!ev) continue;
         results[id] = await DB.results(ev);
@@ -121,10 +145,11 @@
 
   function topBar(withTabs = true) {
     const nNew = requests.filter((r) => r.status === "new").length;
+    const nCheck = board.items.filter((i) => i.status === "staging").length;
     return `<div class="a-top">
       <div class="brand"><img src="../assets/logo-static.svg" alt=""> musik scout <span class="mono">Backstage</span></div>
-      ${withTabs ? `<div class="a-tabs mono"><button data-tab="events" aria-pressed="${tab === "events"}">${T("tabEvents")}</button><button data-tab="requests" aria-pressed="${tab === "requests"}">${T("tabRequests")}${nNew ? ` <span class="count">${nNew}</span>` : ""}</button></div>` : ""}
-      <div class="cta-row" style="margin:0;align-items:center">${langSwitch()}<a class="btn sm ghost" href="../index.html" target="_blank">${T("website")}</a>${withTabs ? `<button class="btn sm" id="logout">${T("logout")}</button>` : `<button class="btn sm" id="back">${T("back")}</button>`}</div>
+      ${withTabs ? `<div class="a-tabs mono"><button data-tab="events" aria-pressed="${tab === "events"}">${T("tabEvents")}</button><button data-tab="requests" aria-pressed="${tab === "requests"}">${T("tabRequests")}${nNew ? ` <span class="count">${nNew}</span>` : ""}</button><button data-tab="board" aria-pressed="${tab === "board"}">${T("tabBoard")}${nCheck ? ` <span class="count">${nCheck}</span>` : ""}</button></div>` : ""}
+      <div class="cta-row" style="margin:0;align-items:center">${langSwitch()}<a class="btn sm ghost" href="../index.html" target="_blank">${T("website")}</a>${withTabs ? `<button class="btn sm ghost" id="account">${T("account")}</button><button class="btn sm" id="logout">${T("logout")}</button>` : `<button class="btn sm" id="back">${T("back")}</button>`}</div>
     </div>`;
   }
 
@@ -230,6 +255,8 @@
   }
 
   app.addEventListener("change", (ev) => {
+    const bs = ev.target.closest("[data-role=bstatus]");
+    if (bs) { const id = bs.closest(".bi").dataset.bid; guard(async () => { await DB.boardUpdate(id, { status: bs.value }); await DB.boardComment(id, "", { approved: "approved", rejected: "rejected", staging: "staging", done: "done", planned: "planned" }[bs.value] || ""); toast(T("saved")); await load(); }); return; }
     const sel = ev.target.closest("[data-role=status]"); if (!sel) return;
     const id = sel.closest(".req").dataset.rid;
     guard(async () => { await DB.updateRequest(id, { status: sel.value }); requests.find((r) => r.id === id).status = sel.value; toast(T("saved")); rerender(); });
@@ -237,6 +264,17 @@
 
   app.addEventListener("click", (ev) => {
     if (ev.target.id === "logout") { DB.signOut(); renderLogin(); return; }
+    if (ev.target.id === "account") { openAccount(); return; }
+    if (ev.target.id === "newitem") { boardForm = true; renderBoard(); return; }
+    const bfl = ev.target.closest("[data-bfilter]"); if (bfl) { boardFilter = bfl.dataset.bfilter; renderBoard(); return; }
+    const ba = ev.target.closest("[data-bact]");
+    if (ba) {
+      const card = ba.closest(".bi"), id = card.dataset.bid, a = ba.dataset.bact, txt = card.querySelector("[data-role=cmt]").value.trim();
+      if (a === "delete") { if (confirm(T("confirmItemDelete"))) guard(async () => { await DB.boardDelete(id); await load(); }); return; }
+      if (a === "comment" && !txt) return;
+      guard(() => boardAction(id, a, txt));
+      return;
+    }
     if (ev.target.id === "back") { editing = null; view = "list"; rerender(); return; }
     const tb = ev.target.closest("[data-tab]"); if (tb) { tab = tb.dataset.tab; view = "list"; rerender(); return; }
     const rf = ev.target.closest("[data-rfilter]"); if (rf) { reqFilter = rf.dataset.rfilter; renderRequests(); return; }
@@ -264,6 +302,96 @@
     if (act === "edit") { editing = e; renderEditor(); }
     if (act === "copy") { navigator.clipboard.writeText(site("vote.html?e=" + encodeURIComponent(id))).then(() => toast(T("copied"))); }
   });
+
+
+  // ── Account (password) ──
+  function openAccount() {
+    const s = DB.session() || {};
+    const m = document.createElement("div"); m.className = "modal";
+    m.innerHTML = `<form class="modal-box" id="pwf">
+      <div class="mono lime">${T("account")}</div><h2 style="font-size:1.8rem">${esc(s.email || "")}</h2>
+      <label class="field"><span class="mono dim">${T("newPw")}</span><input type="password" name="p1" autocomplete="new-password" required minlength="10"></label>
+      <label class="field"><span class="mono dim">${T("newPw2")}</span><input type="password" name="p2" autocomplete="new-password" required minlength="10"></label>
+      <p class="hint">${DB.DEMO ? T("pwDemo") : T("pwHint")}</p>
+      <div class="err" id="pwerr"></div>
+      <div class="cta-row"><button class="btn primary" ${DB.DEMO ? "disabled" : ""}>${T("pwSave")}</button><button type="button" class="btn ghost" id="pwclose">${T("close")}</button></div>
+    </form>`;
+    document.body.appendChild(m);
+    const close = () => m.remove();
+    m.querySelector("#pwclose").onclick = close;
+    m.addEventListener("click", (e) => { if (e.target === m) close(); });
+    m.querySelector("#pwf").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const f = new FormData(e.target), p1 = f.get("p1"), p2 = f.get("p2"), err = m.querySelector("#pwerr");
+      if (p1.length < 10) { err.textContent = T("pwShort"); return; }
+      if (p1 !== p2) { err.textContent = T("pwMismatch"); return; }
+      try { await DB.changePassword(p1); toast(T("pwDone")); close(); }
+      catch (x) { if (x.message === "SESSION") { close(); toast(T("relogin")); renderLogin(); } else err.textContent = x.message; }
+    });
+  }
+
+  // ── Board ──
+  function boardCard(it) {
+    const cs = board.comments.filter((c) => c.item_id === it.id);
+    const when = (d) => new Date(d).toLocaleString(lang === "de" ? "de-DE" : "en-GB", { dateStyle: "medium", timeStyle: "short" });
+    return `<article class="ev bi st-${it.status}" data-bid="${esc(it.id)}">
+      <div class="ev-main" style="grid-template-columns:1fr auto">
+        <div>
+          <div class="mono"><span class="kind k-${it.kind}">${T("k_" + it.kind)}</span> <span class="dim">${T("by")} ${esc(it.author)} · ${when(it.created_at)}</span></div>
+          <div class="ev-acts" style="font-size:1.35rem;margin-top:6px">${esc(it.title)}</div>
+          ${it.body ? `<p class="req-msg" style="margin-top:10px">${esc(it.body)}</p>` : ""}
+          ${it.link ? `<a class="mono lime" href="${esc(it.link)}" target="_blank" rel="noopener">${T("openLink")}</a>` : ""}
+        </div>
+        <select data-role="bstatus">${["open", "planned", "staging", "approved", "rejected", "done"].map((x) => `<option value="${x}" ${it.status === x ? "selected" : ""}>${T("s_" + x)}</option>`).join("")}</select>
+      </div>
+      <div class="ev-res">
+        ${cs.length ? `<div class="thread">${cs.map((c) => `<div class="cmt"><div class="mono dim">${esc(c.author)} · ${when(c.created_at)}${c.action ? ` · <span class="act-${c.action}">${T("a_" + c.action)}</span>` : ""}</div>${c.body ? `<div>${esc(c.body)}</div>` : ""}</div>`).join("")}</div>` : ""}
+        <div class="cmt-row"><input data-role="cmt" placeholder="${T("commentPh")}"><button class="btn sm ghost" data-bact="comment">${T("send")}</button></div>
+        <div class="win-row">
+          ${it.status === "staging" ? `<button class="btn sm primary" data-bact="approved">✓ ${T("approve")}</button><button class="btn sm ghost" data-bact="changes">${T("changes")}</button><button class="btn sm ghost danger" data-bact="rejected">✕ ${T("rejectB")}</button>`
+            : it.status === "approved" ? `<button class="btn sm primary" data-bact="done">${T("markDone")}</button>`
+            : ["open", "planned"].includes(it.status) ? `<button class="btn sm ghost" data-bact="staging">${T("markStaging")}</button><button class="btn sm ghost danger" data-bact="rejected">${T("rejectB")}</button>` : ""}
+          <span class="spacer" style="flex:1"></span>
+          <button class="btn sm ghost danger" data-bact="delete">${T("del")}</button>
+        </div>
+      </div>
+    </article>`;
+  }
+
+  function renderBoard() {
+    view = "list"; tab = "board";
+    const groups = { active: ["open", "planned", "staging", "approved"], check: ["staging"], closed: ["done", "rejected"] };
+    const list = board.items.filter((i) => groups[boardFilter].includes(i.status));
+    app.innerHTML = `${topBar()}
+      <div class="a-wrap">
+        <div class="a-head"><h2>${T("boardTitle")}</h2><button class="btn primary" id="newitem">${T("newItem")}</button></div>
+        <p class="dim" style="max-width:62ch;margin:-6px 0 18px">${T("boardIntro")}</p>
+        ${boardForm ? `<form class="ev board-form" id="bf">
+          <div class="radio-row">${["wish", "proposal", "bug"].map((k, i) => `<label><input type="radio" name="kind" value="${k}" ${i === 0 ? "checked" : ""}> ${T("k_" + k)}</label>`).join("")}</div>
+          <label class="field"><span class="mono dim">${T("title")}</span><input name="title" required maxlength="200"></label>
+          <label class="field"><span class="mono dim">${T("details")}</span><textarea name="body" rows="3"></textarea></label>
+          <label class="field"><span class="mono dim">${T("linkOpt")}</span><input name="link" placeholder="https://"></label>
+          <div class="cta-row"><button class="btn primary">${T("add")}</button><button type="button" class="btn ghost" id="bfcancel">${T("cancel")}</button></div>
+        </form>` : ""}
+        <div class="a-tabs mono small" style="margin-bottom:16px">${[["active", T("f_active")], ["check", T("f_check")], ["closed", T("f_doneRej")]].map(([k, l]) => `<button data-bfilter="${k}" aria-pressed="${boardFilter === k}">${l}</button>`).join("")}</div>
+        <div class="ev-list">${list.map(boardCard).join("") || `<p class="dim">${T("boardEmpty")}</p>`}</div>
+      </div>`;
+    const bf = document.getElementById("bf");
+    if (bf) {
+      document.getElementById("bfcancel").onclick = () => { boardForm = false; renderBoard(); };
+      bf.addEventListener("submit", (e) => {
+        e.preventDefault(); const f = new FormData(bf);
+        guard(async () => { await DB.boardAdd({ kind: f.get("kind"), title: f.get("title").trim(), body: f.get("body").trim(), link: f.get("link").trim() }); boardForm = false; toast(T("saved")); await load(); });
+      });
+    }
+  }
+
+  async function boardAction(id, action, body = "") {
+    const statusFor = { approved: "approved", rejected: "rejected", changes: "planned", staging: "staging", done: "done" };
+    if (statusFor[action]) await DB.boardUpdate(id, { status: statusFor[action] });
+    if (body || action !== "comment") await DB.boardComment(id, body, action === "comment" ? "" : action);
+    await load();
+  }
 
   // ── Editor ──
   function actRow(a = {}) {

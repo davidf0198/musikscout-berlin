@@ -174,6 +174,40 @@
       return req("/rest/v1/rpc/vote_stats", { method: "POST", body: JSON.stringify({ p_event: ev.id }) }, true);
     },
 
+    // ── Konto ──
+    async changePassword(pw) {
+      if (DEMO) return;
+      const r = await fetch(URL_ + "/auth/v1/user", { method: "PUT", headers: headers(true), body: JSON.stringify({ password: pw }) });
+      if (r.status === 401) { ls.set("ms-session", null); throw new Error("SESSION"); }
+      if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.msg || j.error_description || j.message || "ERR"); }
+    },
+
+    // ── Feedback-Board ──
+    async board() {
+      if (DEMO) return { items: ls.get("ms-demo-board", []), comments: ls.get("ms-demo-board-c", []) };
+      const [items, comments] = await Promise.all([
+        req("/rest/v1/board_items?select=*&order=created_at.desc", {}, true),
+        req("/rest/v1/board_comments?select=*&order=created_at.asc", {}, true),
+      ]);
+      return { items, comments };
+    },
+    async boardAdd(item) {
+      if (DEMO) { const a = ls.get("ms-demo-board", []); a.unshift({ id: String(Date.now()), created_at: new Date().toISOString(), author: (this.session() || {}).email || "demo", status: "open", ...item }); ls.set("ms-demo-board", a); return; }
+      await req("/rest/v1/board_items", { method: "POST", body: JSON.stringify(item), headers: Object.assign(headers(true), { Prefer: "return=minimal" }) }, true);
+    },
+    async boardUpdate(id, patch) {
+      if (DEMO) { ls.set("ms-demo-board", ls.get("ms-demo-board", []).map((x) => (x.id === id ? { ...x, ...patch } : x))); return; }
+      await req(`/rest/v1/board_items?id=eq.${id}`, { method: "PATCH", body: JSON.stringify({ ...patch, updated_at: new Date().toISOString() }) }, true);
+    },
+    async boardDelete(id) {
+      if (DEMO) { ls.set("ms-demo-board", ls.get("ms-demo-board", []).filter((x) => x.id !== id)); return; }
+      await req(`/rest/v1/board_items?id=eq.${id}`, { method: "DELETE" }, true);
+    },
+    async boardComment(itemId, body, action = "") {
+      if (DEMO) { const a = ls.get("ms-demo-board-c", []); a.push({ id: String(Date.now()), item_id: itemId, created_at: new Date().toISOString(), author: (this.session() || {}).email || "demo", body, action }); ls.set("ms-demo-board-c", a); return; }
+      await req("/rest/v1/board_comments", { method: "POST", body: JSON.stringify({ item_id: itemId, body, action }), headers: Object.assign(headers(true), { Prefer: "return=minimal" }) }, true);
+    },
+
     // ── Admin ──
     session: () => (DEMO ? ls.get("ms-demo-session", null) : ls.get("ms-session", null)),
 
