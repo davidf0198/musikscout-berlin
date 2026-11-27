@@ -88,3 +88,5 @@ select:focus, .admin input:focus { outline: none; border-color: var(--lime); }
 .cmt-row { display: flex; gap: 8px; } .cmt-row input { flex: 1; }
 .radio-row { display: flex; gap: 18px; flex-wrap: wrap; }
 .radio-row label { display: flex; gap: 8px; align-items: center; cursor: pointer; }
+.forgot { justify-self: start; font-family: var(--mono); font-size: .75rem; color: var(--ink-dim) !important; }
+.err .ok { color: var(--lime); }

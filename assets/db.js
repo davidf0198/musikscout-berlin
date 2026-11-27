@@ -233,6 +233,28 @@
 
     signOut() { ls.set("ms-session", null); ls.set("ms-demo-session", null); },
 
+    // Link aus Einladungs-/Passwort-Mail: #access_token=…&type=invite|recovery
+    takeAuthFromUrl() {
+      if (!location.hash.includes("access_token=")) return null;
+      const h = new URLSearchParams(location.hash.slice(1));
+      const token = h.get("access_token"), type = h.get("type") || "";
+      history.replaceState(null, "", location.pathname + location.search);
+      if (!token) return null;
+      let email = "";
+      try { email = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))).email || ""; } catch (e) {}
+      ls.set("ms-session", { access_token: token, email, exp: Date.now() + (Number(h.get("expires_in")) || 3600) * 1000 });
+      return type;
+    },
+
+    // "Passwort vergessen": Supabase schickt eine Mail mit Link zurück in den Backstage
+    async requestReset(email) {
+      if (DEMO) return;
+      const r = await fetch(`${URL_}/auth/v1/recover?redirect_to=${encodeURIComponent(location.origin + location.pathname)}`, {
+        method: "POST", headers: { apikey: C.supabaseAnonKey, "Content-Type": "application/json" }, body: JSON.stringify({ email }),
+      });
+      if (!r.ok && r.status !== 429) throw new Error(await r.text());
+    },
+
     async saveEvent(ev, oldId) {
       if (DEMO) {
         const evs = demoEvents().filter((e) => e.id !== (oldId || ev.id));

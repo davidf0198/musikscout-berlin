@@ -8,6 +8,8 @@
   // ── Texts ──
   const TX = {
     en: {
+      forgot: "Forgot password?", resetSend: "Send reset link", resetSent: "If this email has an account, a link to set a new password is on its way. Check your inbox (and spam).",
+      setPwTitle: "Set your password", setPwIntro: "Welcome! Choose a password for your Backstage account.", setPwBtn: "Save password and continue", linkExpired: "This link has expired. Use “Forgot password?” to get a new one.",
       tabBoard: "Board", account: "Account", newPw: "New password", newPw2: "Repeat new password", pwHint: "At least 10 characters.",
       pwSave: "Change password", pwMismatch: "The passwords don’t match.", pwShort: "Too short (min. 10 characters).", pwDone: "Password changed",
       pwDemo: "Not available in demo mode.", close: "Close",
@@ -44,6 +46,8 @@
       capacity: "Capacity", tech: "Equipment", dates: "Dates", type: "Type", fileDemo: "(not available in demo mode)",
     },
     de: {
+      forgot: "Passwort vergessen?", resetSend: "Link zum Zurücksetzen senden", resetSent: "Falls zu dieser E-Mail ein Konto existiert, kommt gleich ein Link zum Festlegen eines neuen Passworts. Bitte Posteingang (und Spam) prüfen.",
+      setPwTitle: "Passwort festlegen", setPwIntro: "Willkommen! Lege ein Passwort für deinen Backstage-Zugang fest.", setPwBtn: "Passwort speichern und weiter", linkExpired: "Dieser Link ist abgelaufen. Über „Passwort vergessen?“ bekommst du einen neuen.",
       tabBoard: "Board", account: "Konto", newPw: "Neues Passwort", newPw2: "Neues Passwort wiederholen", pwHint: "Mindestens 10 Zeichen.",
       pwSave: "Passwort ändern", pwMismatch: "Die Passwörter stimmen nicht überein.", pwShort: "Zu kurz (mind. 10 Zeichen).", pwDone: "Passwort geändert",
       pwDemo: "Im Demo-Modus nicht verfügbar.", close: "Schließen",
@@ -117,8 +121,15 @@
         <label class="field"><span class="mono dim">${T("password")}</span><input name="pw" type="password" required autocomplete="current-password"></label>
         <button class="btn primary" style="justify-content:center">${T("signin")}</button>
         <div class="err" id="err"></div>
+        <button type="button" class="linklike forgot" id="forgot">${T("forgot")}</button>
         ${DB.DEMO ? `<div class="demo-note">${T("demoLogin")}</div>` : ""}
       </form></div>`;
+    document.getElementById("forgot").onclick = async () => {
+      const em = document.querySelector("#login input[name=email]");
+      if (!em.value || !em.checkValidity()) { em.reportValidity(); return; }
+      try { await DB.requestReset(em.value.trim()); } catch (x) { console.error(x); }
+      document.getElementById("err").innerHTML = `<span class="ok">${T("resetSent")}</span>`;
+    };
     document.getElementById("login").addEventListener("submit", async (e) => {
       e.preventDefault();
       const f = new FormData(e.target);
@@ -461,5 +472,31 @@
   }
 
   document.documentElement.lang = lang;
-  DB.isAdmin() ? load() : renderLogin();
+  // Invitation / reset link: let the user choose a password first
+  function renderSetPassword() {
+    const s = DB.session() || {};
+    app.innerHTML = `<div class="login"><form id="setpw">
+        <div style="display:flex;justify-content:space-between;align-items:center"><img src="../assets/logo.svg" alt="">${langSwitch()}</div>
+        <div class="mono lime">Backstage</div>
+        <h1>${T("setPwTitle")}</h1>
+        <p class="dim">${T("setPwIntro")}<br><span class="mono">${esc(s.email || "")}</span></p>
+        <label class="field"><span class="mono dim">${T("newPw")}</span><input type="password" name="p1" autocomplete="new-password" required minlength="10"></label>
+        <label class="field"><span class="mono dim">${T("newPw2")}</span><input type="password" name="p2" autocomplete="new-password" required minlength="10"></label>
+        <p class="hint">${T("pwHint")}</p>
+        <button class="btn primary" style="justify-content:center">${T("setPwBtn")}</button>
+        <div class="err" id="err"></div>
+      </form></div>`;
+    document.getElementById("setpw").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const f = new FormData(e.target), p1 = f.get("p1"), p2 = f.get("p2"), err = document.getElementById("err");
+      if (p1.length < 10) { err.textContent = T("pwShort"); return; }
+      if (p1 !== p2) { err.textContent = T("pwMismatch"); return; }
+      try { await DB.changePassword(p1); toast(T("pwDone")); await load(); }
+      catch (x) { if (x.message === "SESSION") { renderLogin(); document.getElementById("err").textContent = T("linkExpired"); } else err.textContent = x.message; }
+    });
+  }
+
+  const authType = DB.takeAuthFromUrl();
+  if (authType === "invite" || authType === "recovery") renderSetPassword();
+  else DB.isAdmin() ? load() : renderLogin();
 })();
